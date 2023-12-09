@@ -65,18 +65,47 @@
         <button class="btn btn-danger" onclick="swapSides()">Swap Sides</button>
     </div>
     <br>
-    <div class="center">
+    <!-- <div class="center">
         <div id="time-left" class="number numBox"></div>
-    </div>
-    <br>
+    </div> -->
+    <!-- <br> -->
     <div class="center">
         <button class="btn btn-success" onclick="declareWinner()">Declare Winner</button>
     </div>
     <br>
     <div class="center">
-        <button class="btn btn-warning">New Game</button>
+        <button class="btn btn-warning" data-bs-toggle="offcanvas" data-bs-target="#newGameModal"
+            aria-controls="offcanvasExample">New Game</button>
     </div>
     <br>
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="newGameModal" aria-labelledby="offcanvasExampleLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasExampleLabel">Create New Game</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="new-pl1-name" placeholder="name@example.com">
+                <label for="new-pl1-name">Player 1 Name</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="new-pl2-name" placeholder="name@example.com">
+                <label for="new-pl2-name">Player 2 Name</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="datetime-local" class="form-control" id="new-st" placeholder="name@example.com">
+                <label for="new-pl2-name">Start Time</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="number" class="form-control" id="new-dur" placeholder="name@example.com">
+                <label for="new-pl2-name">Duration (min)</label>
+            </div>
+            <button class="w-100 btn btn-dark" onclick="newGame()">Create</button>
+        </div>
+    </div>
+
 </body>
 <script>
     function load() {
@@ -88,49 +117,104 @@
             document.getElementById('player2-name').innerHTML = matchData.player2.name;
             document.getElementById('player2-score').innerHTML = matchData.player2.score;
 
-            time = setInterval(function () {
-                cTime = new Date().getTime()
-                sTime = new Date(matchData.time.start).getTime()
-                timeRem = cTime - sTime;
-                dur = matchData.time.total * 1000;
-                if ((dur - timeRem) < 0) {
-                    document.getElementById('box').innerHTML = '';
-                    matchEnd(matchData)
-                    document.getElementById('time-left').style.display = 'none'
-                } else {
-                    secR = (dur - timeRem) / 1000
-                    hrs = String(Math.floor(secR / 60))
-                    hrs = hrs[hrs.length - 2] + hrs[hrs.length - 1]
-                    remT = hrs + ' : ' + (Math.round(secR % 60))
-                    document.getElementById('time-left').innerHTML = remT;
-                }
-            }, 1000)
+            // time = setInterval(function () {
+            //     cTime = new Date().getTime()
+            //     sTime = new Date(matchData.time.start).getTime()
+            //     timeRem = cTime - sTime;
+            //     dur = matchData.time.total * 1000;
+            //     if ((dur - timeRem) < 0) {
+            //         document.getElementById('box').innerHTML = '';
+            //         matchEnd(matchData)
+            //         document.getElementById('time-left').style.display = 'none'
+            //     } else {
+            //         secR = (dur - timeRem) / 1000
+            //         hrs = String(Math.floor(secR / 60))
+            //         hrs = hrs[hrs.length - 2] + hrs[hrs.length - 1]
+            //         remT = hrs + ' : ' + (Math.round(secR % 60))
+            //         document.getElementById('time-left').innerHTML = remT;
+            //     }
+            // }, 1000)
         })
     }
-function pl1(change){
-    pl1Ref = firebase.database().ref('sports/tt/cMatch/player1/score');
-    pl1Ref.once('value',(snapshot)=>{
-        pl1Score = snapshot.val()
-        console.log(pl1Score+change)
-        pl1Ref.set(Number(Number(pl1Score)+Number(change)))
-    })
-}
-function pl2(change){
-    pl2Ref = firebase.database().ref('sports/tt/cMatch/player2/score');
-    pl2Ref.once('value',(snapshot)=>{
-        pl2Score = snapshot.val()
-        console.log(pl2Score+change)
-        pl2Ref.set(Number(Number(pl2Score)+Number(change)))
-    })
-}
+    function pl1(change) {
+        pl1Ref = firebase.database().ref('sports/tt/cMatch/player1/score');
+        pl1Ref.once('value', (snapshot) => {
+            pl1Score = snapshot.val()
+            console.log(pl1Score + change)
+            pl1Ref.set(Number(Number(pl1Score) + Number(change)))
+        })
+    }
+    function pl2(change) {
+        pl2Ref = firebase.database().ref('sports/tt/cMatch/player2/score');
+        pl2Ref.once('value', (snapshot) => {
+            pl2Score = snapshot.val()
+            console.log(pl2Score + change)
+            pl2Ref.set(Number(Number(pl2Score) + Number(change)))
+        })
+    }
+    function swapSides() {
+        firebase.database().ref('sports/tt/cMatch').once('value', (snapshot) => {
+            matchData = snapshot.val()
+            data = {
+            matchOver: false,
+            player1: {
+                name: matchData.player2.name,
+                score: matchData.player2.score
+            },
+            player2: {
+                name: matchData.player1.name,
+                score: matchData.player1.score
+            },
+            time: {
+                start: matchData.time.start,
+                total: matchData.time.total
+            }
+        }
+        firebase.database().ref('sports/tt/cMatch').set(data)
+
+        });
+    }
+    function declareWinner() {
+        pl1Score = Number(document.getElementById('player1-score').innerHTML)
+        pl2Score = Number(document.getElementById('player2-score').innerHTML)
+        if (pl1Score > pl2Score) {
+            swal(`${document.getElementById('player1-name').innerHTML} is the winner!`)
+        } else if (pl1Score < pl2Score) {
+            swal(`${document.getElementById('player2-name').innerHTML} is the winner!`)
+        } else {
+            swal('Tie!')
+        }
+        firebase.database().ref('sports/tt/cMatch/matchOver').set(true)
+    }
+    function newGame() {
+        d = new Date(document.getElementById('new-st').value)
+        data = {
+            matchOver: false,
+            player1: {
+                name: document.getElementById('new-pl1-name').value,
+                score: 0
+            },
+            player2: {
+                name: document.getElementById('new-pl2-name').value,
+                score: 0
+            },
+            time: {
+                start: d.getTime(),
+                total: Number(document.getElementById('new-dur').value) * 60
+            }
+        }
+        firebase.database().ref('sports/tt/cMatch').set(data)
+    }
 </script>
 <style>
-    .vwh-50{
+    .vwh-50 {
         height: 50vw;
     }
-    .d-flex{
+
+    .d-flex {
         display: flex;
     }
+
     .f-32 {
         font-size: 32px;
     }
@@ -148,7 +232,8 @@ function pl2(change){
     .vw-50 {
         width: 50vw;
     }
-    .numBox{
+
+    .numBox {
         border: 2px dashed black;
         padding: 5px;
         border-radius: 5px;
