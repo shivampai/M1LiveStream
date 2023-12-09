@@ -64,7 +64,9 @@
 
             document.getElementById('player2-name').innerHTML = matchData.player2.name;
             document.getElementById('player2-score').innerHTML = matchData.player2.score;
-
+            if(matchData.matchOver == true){
+                matchEnd(matchData)
+            }
             // time = setInterval(function () {
             //     cTime = new Date().getTime()
             //     sTime = new Date(matchData.time.start).getTime()
