@@ -4,21 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Madhuvan</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="main.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <title></title>
+    <!-- <script src="main.js"></script> -->
     <script src="https://www.gstatic.com/firebasejs/7.6.2/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/live/3.1/firebase.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <script>
         var config = {
             apiKey: "AIzaSyBqkvA0-n4JinrVhyOkDh8sehnIVuXbqZg",
@@ -32,102 +23,162 @@
         };
         firebase.initializeApp(config);
     </script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+
 </head>
 
-<body onload="load()">
-    <div id="box" class="box">
-        <span class="sep-elem">
-            <div style="justify-content: center;">
-                <span id="player1-name"></span><br>
-                <span id="player1-score" class="player-score"></span>
-            </div>
-            <span>v/s</span>
-            <div style="justify-content: center;">
-                <span id="player2-name"></span><br>
-                <span id="player2-score" class="player-score"></span>
-            </div>
-        </span>
+<body onload="load()" style="width: 100vw !important;margin: 0px;">
+    <div class="center">
+        <div class="topBar">
+Estimated Score : 65 | Last Wicket : SP : 45(23)
+        </div>
     </div>
-    <div style="display: flex;justify-content: center;width: 200px;">
-        <span class="time-label" id="time-left"></span>
+    <div class="scorebar">
+        <div id="left-bar">
+            <div id="team1-name" class="teamName">Strikers</div>&nbsp;&nbsp;&nbsp;
+            <div style="width: 100px;display: flex;justify-content: space-between;" id="">
+                <span id="team1-batter1-name">SP</span>
+                100
+            </div>&nbsp;&nbsp;
+            <div style="width: 100px;display: flex;justify-content: space-between;" id="">
+                <span id="team1-batter2-name">SP2</span>
+                100
+            </div>
+        </div>
+        <div id="over-lbl" style="padding-top: 10px;">
+            1.0 overs
+        </div>
+        <div id="right-bar">
+            <div id="team2-name" class="teamName">Trailblazers</div>
+        </div>
     </div>
-    <audio src="emergency-alarm-with-reverb-29431.mp3" id="alert-sound"></audio>
+    <div class="center">
+        <div class="runBall">
+            <span id="runs">12</span>
+            /
+            <span id="wickets">1</span>
+        </div>
+    </div>
 </body>
-<script>
-    function load() {
-        firebase.database().ref('sports/tt/cMatch').on('value', (snapshot) => {
-            matchData = snapshot.val()
-            document.getElementById('player1-name').innerHTML = matchData.player1.name;
-            document.getElementById('player1-score').innerHTML = matchData.player1.score;
-
-            document.getElementById('player2-name').innerHTML = matchData.player2.name;
-            document.getElementById('player2-score').innerHTML = matchData.player2.score;
-
-            time = setInterval(function () {
-                cTime = new Date().getTime()
-                sTime = new Date(matchData.time.start).getTime()
-                timeRem = cTime - sTime;
-                dur = matchData.time.total * 1000;
-                if ((dur - timeRem) < 0) {
-                    document.getElementById('box').innerHTML = '';
-                    matchEnd(matchData)
-                    document.getElementById('time-left').style.display = 'none'
-                } else {
-                    secR = (dur - timeRem) / 1000
-                    remT = Math.floor(secR / 60) + ' : ' + (Math.round(secR % 60))
-                    document.getElementById('time-left').innerHTML = remT;
-                }
-            }, 1000)
-        })
-    }
-    function matchEnd(data){
-        if(data.player1.score > data.player2.score){
-            document.getElementById('box').innerHTML = `${data.player1.name} won the match by ${Number(data.player1.score)-Number(data.player2.score)} points.`;
-        }else if(data.player1.score < data.player2.score){
-            document.getElementById('box').innerHTML = `${data.player2.name} won the match by ${Number(data.player2.score)-Number(data.player1.score)} points.`;
-        }else{
-            document.getElementById('box').innerHTML = `Tie between ${data.player1.name} & ${data.player2.name}`
-        }
-    }
-</script>
 <style>
-    .player-score {
-        font-size: 22px;
-        width: 100vw;
-        text-align: center;
-    }
-
-    .sep-elem {
+    .topBar {
         display: flex;
-        justify-content: space-between;
-    }
-
-    .time-label {
-        background-color: white;
-        color: black;
-        padding-left: 15px;
-        padding-right: 15px;
-        font-size: 18px;
-        border-bottom-left-radius: 15px;
-        border-bottom-right-radius: 15px;
-        border: 3px solid black;
-    }
-
-    .box {
+        justify-content: center;
+        align-items: center;
         background-color: black;
-        padding: 10px;
+        width: 50vw;
+        height: 50px;
+        border-bottom-left-radius: 50px;
+        border-bottom-right-radius: 50px;
         color: white;
-        width: 200px;
-        height: 75px;
-        border-bottom-right-radius: 25px;
-        border-bottom-left-radius: 15px;
     }
 
     body {
-        background-color: transparent;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .teamName {
+        font-size: 24px;
+    }
+
+    #left-bar {
+        padding-left: 10px;
+        width: 40vw;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+    }
+
+    #right-bar {
+        display: flex;
+        justify-content: right;
+        align-items: center;
+        padding-right: 10px;
+        width: 40vw;
+    }
+
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .runBall {
+        border-radius: 200px;
+        border: 3px solid black;
+        width: 75px;
+        height: 75px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        position: absolute;
+        z-index: 12px;
+        bottom: 30px;
+        font-size: 22px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .scorebar {
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: absolute;
+        bottom: 0px;
+        width: 100vw;
+        height: 50px;
+        background-color: black;
+        font-family: 'Poppins', sans-serif;
     }
 </style>
+<!-- <style>
+    #left-scorebar {
+        background-color: black;
+        color: white;
+        width: 25vw;
+        height: 50px;
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 100px;
+        padding-right: 15px;
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Poppins',sans-serif;
+        align-items: center;
+        padding-left: 5px;
+    }
+
+    #centre-scorebar {
+        width: 100px;
+        font-size: 22px;
+        background-color: black;
+        color: white;
+        height: 50px;
+        border-radius: 200px;
+        text-align: center;
+        font-family: 'Poppins',sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #right-scorebar {
+        background-color: black;
+        color: white;
+        width: 25vw;
+        height: 50px;
+        border-top-left-radius: 100px;
+        border-bottom-left-radius: 100px;
+        padding-left: 15px;
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Poppins',sans-serif;
+        align-items: center;
+        padding-right: 5px;
+    }
+</style> -->
+<script>
+
+</script>
 
 </html>
