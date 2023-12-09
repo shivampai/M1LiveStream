@@ -1,0 +1,67 @@
+:root {
+    --team1bg: white;
+    --team1fc: white;
+    --team2bg: white;
+    --team2fc: white;
+}
+
+.scorebar {
+    display: flex;
+    justify-content: space-around;
+    position: absolute;
+    bottom: 0px;
+    width: 100vw;
+    height: 50px;
+    margin: none;
+    border-top: 1px black dotted;
+    background-color: var(--team1bg);
+    background-image: linear-gradient(to right, var(--team1bg) , var(--team2bg));
+}
+
+.scorebox {
+    /* margin-left: 50%; */
+    -ms-transform: translateY(-5px);
+    transform: translateY(-5px);
+    margin-bottom: 10px;
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    border-top: 30px solid white;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    height: 0;
+    width: 75px;
+    color: black;
+}
+#scorebox-runs{
+    color: var(--team1bg);
+}
+#scorebox-wickets{
+    color: var(--team2bg);
+}
+.team1box {
+    width: 40vw;
+    color: var(--team1fc);
+    font-family: 'Poppins', sans-serif;
+    padding-left: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.team2box {
+    width: 50vw;
+    color: var(--team2fc);
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content:space-between;
+    padding-right: 10px;
+}
+
+.active-player-dot {
+    display: non;
+    padding: 3px;
+    height: 0px;
+    background-color: white;
+    border-radius: 0%;
+}
