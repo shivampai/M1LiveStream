@@ -50,9 +50,9 @@
             </div>
         </span>
     </div>
-    <div style="display: flex;justify-content: center;width: 200px;">
+    <!-- <div style="display: flex;justify-content: center;width: 200px;">
         <span class="time-label" id="time-left"></span>
-    </div>
+    </div> -->
     <audio src="emergency-alarm-with-reverb-29431.mp3" id="alert-sound"></audio>
 </body>
 <script>
@@ -65,21 +65,21 @@
             document.getElementById('player2-name').innerHTML = matchData.player2.name;
             document.getElementById('player2-score').innerHTML = matchData.player2.score;
 
-            time = setInterval(function () {
-                cTime = new Date().getTime()
-                sTime = new Date(matchData.time.start).getTime()
-                timeRem = cTime - sTime;
-                dur = matchData.time.total * 1000;
-                if ((dur - timeRem) < 0) {
-                    document.getElementById('box').innerHTML = '';
-                    matchEnd(matchData)
-                    document.getElementById('time-left').style.display = 'none'
-                } else {
-                    secR = (dur - timeRem) / 1000
-                    remT = Math.floor(secR / 60) + ' : ' + (Math.round(secR % 60))
-                    document.getElementById('time-left').innerHTML = remT;
-                }
-            }, 1000)
+            // time = setInterval(function () {
+            //     cTime = new Date().getTime()
+            //     sTime = new Date(matchData.time.start).getTime()
+            //     timeRem = cTime - sTime;
+            //     dur = matchData.time.total * 1000;
+            //     if ((dur - timeRem) < 0) {
+            //         document.getElementById('box').innerHTML = '';
+            //         matchEnd(matchData)
+            //         document.getElementById('time-left').style.display = 'none'
+            //     } else {
+            //         secR = (dur - timeRem) / 1000
+            //         remT = Math.floor(secR / 60) + ' : ' + (Math.round(secR % 60))
+            //         document.getElementById('time-left').innerHTML = remT;
+            //     }
+            // }, 1000)
         })
     }
     function matchEnd(data){
