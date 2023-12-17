@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <!-- <script src="main.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/live/3.1/firebase.js"></script>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <script>
+        var config = {
+            apiKey: "AIzaSyBqkvA0-n4JinrVhyOkDh8sehnIVuXbqZg",
+            authDomain: "madhuvanchs-app.firebaseapp.com",
+            databaseURL: "https://madhuvanchs-app-default-rtdb.firebaseio.com",
+            projectId: "madhuvanchs-app",
+            storageBucket: "madhuvanchs-app.appspot.com",
+            messagingSenderId: "149710078041",
+            appId: "1:149710078041:web:d1b1dbe4ff26db1b94f148",
+            measurementId: "G-C9FCN66REC"
+        };
+        firebase.initializeApp(config);
+    </script>
+    <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa&family=Lato&family=Orbitron&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body onload="load()" style="width: 100vw !important;margin: 0px;">
+    <div class="center">
+        <label class="h2">Team 1 v/s Team 2</label>
+    </div>
+    <div class="center">
+        <label class="h1">12-1 (1.0)</label>
+    </div>
+    <hr>
+    <b>New Delivery : </b>
+    <div class="d-flex">
+        <button class="ball-assign" onclick="assignBall(this.innerHTML)">1</button>
+        <button class="ball-assign" onclick="assignBall(this.innerHTML)">2</button>
+        <button class="ball-assign" onclick="assignBall(this.innerHTML)">3</button>
+        <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">4</button>
+        <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">6</button>
+        <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Wd</button>
+        <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">NB</button>
+        <button class="ball-assign bg-pink" onclick="assignBall(this.innerHTML)">W</button>
+    </div>
+    <b>Other Details : </b>
+    <div id="other-options">
+        <div id="wickets-cont">
+            <select name="" class="slct" id="">
+                <option value="" hidden>--Select--</option>
+                <option value="">Catchout</option>
+                <option value="">LBW</option>
+                <option value="">Run Out</option>
+                <option value="">Bowled Out</option>
+            </select>
+            <select name="" class="fielders-dropdown slct" id=""></select>
+        </div>
+    </div>
+    <hr>
+    <span>
+        <span>Review : </span>
+        <label class="switch">
+            <input type="checkbox" id="review-switch" onchange="reviewSwitchToggle()">
+            <span class="slider round"></span>
+        </label>
+        <div>
+            <select class="slct" id="review-original-inp">
+                <option selected disabled value="" oninput="reviewSwitchToggle()">--Original Decision--</option>
+                <option value="out">Out</option>
+                <option value="not out">Not Out</option>
+            </select>
+            <select class="slct" id="review-by-inp">
+                <option selected disabled value="" oninput="reviewSwitchToggle()">--Select review requester--</option>
+                <option value="baller">Baller</option>
+                <option value="batter">Batter</option>
+            </select>
+            <select class="slct" id="review-impact-inp" oninput="reviewSwitchToggle()">
+                <option selected disabled value="">--Select impact--</option>
+                <option value=" ">-</option>
+                <option value="in line">In Line</option>
+                <option value="off line">Off Line</option>
+            </select>
+            <select class="slct" id="review-pitching-inp" oninput="reviewSwitchToggle()">
+                <option selected disabled value="">--Select pitching--</option>
+                <option value=" ">-</option>
+                <option value="in line">In Line</option>
+                <option value="off line">Off Line</option>
+            </select>
+            <select class="slct" id="review-wicket-inp" oninput="reviewSwitchToggle()">
+                <option selected disabled value="">--Select wickets--</option>
+                <option value=" ">-</option>
+                <option value="missing">Missing</option>
+                <option value="hitting">Hitting</option>
+            </select>
+
+
+        </div>
+    </span>
+</body>
+<script>
+    function reviewSwitchToggle() {
+        switchState = document.getElementById('review-switch').checked
+        console.log(switchState)
+        if (switchState == true) {
+            // /* 
+            firebase.database().ref('sports/cricket/liveMatch/review').set({
+                 open:true,
+                 impact:document.getElementById('review-impact-inp').value,
+                 pitching:document.getElementById('review-pitching-inp').value,
+                 wicket:document.getElementById('review-wicket-inp').value,
+                 reviewBy:document.getElementById('review-by-inp').value,
+                 original:document.getElementById('review-original-inp').value,
+             })
+            //  */
+        }else{
+            firebase.database().ref('sports/cricket/liveMatch/review').set({
+                 open:false,
+                 impact:'',
+                 pitching:'',
+                 wicket:'',
+                 reviewBy:'',
+                 original:'',
+             })
+        }
+    }
+    function load() {
+        firebase.database().ref('sports/cricket/liveMatch').on('value', (snapshot) => {
+            matchData = snapshot.val();
+            loadDropdowns()
+        })
+    }
+    function loadDropdowns() {
+        players = {
+            fielders: [
+                { name: 'SP1' }, { name: 'SP2' }, { name: 'SP3' }
+            ], batters: []
+        }
+        elems = document.getElementsByClassName('fielders-dropdown')
+        for (i = 0; i < elems.length; i++) {
+            elems[i].innerHTML = '<option hidden>--Select Player--</option>'
+            for (k = 0; k < players.fielders.length; k++) {
+                elems[i].innerHTML += `<option>${players.fielders[k].name}</option>`
+            }
+        }
+    }
+</script>
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* The slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #6e6e6e;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked+.slider {
+        background-color: #1f1f1f;
+    }
+
+    input:focus+.slider {
+        box-shadow: 0 0 1px #1f1f1f;
+    }
+
+    input:checked+.slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    .slct {
+        background-color: #1f1f1f;
+        border-radius: 5px;
+        color: white;
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+    }
+
+    .bg-b {
+        background-color: blue !important;
+        color: white;
+    }
+
+    .bg-pink {
+        background-color: purple !important;
+        color: white;
+    }
+
+    .bg-red {
+        background-color: red !important;
+        color: white;
+    }
+
+    .ball-assign {
+        width: 12.5vw;
+        height: 12.5vw;
+        font-size: 22px;
+        font-family: 'Orbitron', sans-serif;
+        border-radius: 10px;
+        background-color: #1f1f1f;
+        outline: none;
+        border: none;
+        color: white;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .h2 {
+        font-size: 28px;
+    }
+
+    .h1 {
+        font-size: 34px;
+    }
+
+    .center {
+        display: flex;
+        justify-content: center;
+    }
+
+    body {
+        color: white;
+        background-color: #0a0a0a;
+        font-family: 'Poppins', sans-serif;
+    }
+</style>
+<script>
+
+</script>
+
+</html>
