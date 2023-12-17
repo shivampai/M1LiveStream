@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <!-- <script src="main.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/live/3.1/firebase.js"></script>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <script>
+        var config = {
+            apiKey: "AIzaSyBqkvA0-n4JinrVhyOkDh8sehnIVuXbqZg",
+            authDomain: "madhuvanchs-app.firebaseapp.com",
+            databaseURL: "https://madhuvanchs-app-default-rtdb.firebaseio.com",
+            projectId: "madhuvanchs-app",
+            storageBucket: "madhuvanchs-app.appspot.com",
+            messagingSenderId: "149710078041",
+            appId: "1:149710078041:web:d1b1dbe4ff26db1b94f148",
+            measurementId: "G-C9FCN66REC"
+        };
+        firebase.initializeApp(config);
+    </script>
+    <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+
+</head>
+
+<body onload="load()" style="width: 100vw !important;margin: 0px;">
+    <div style="display: b;" id="main-scorebar">
+        <div class="center">
+            <div class="topBar" id="top-lbl">
+            </div>
+        </div>
+        <div class="scorebar">
+            <div id="left-bar">
+                <div id="team1-name" class="teamName"></div>&nbsp;&nbsp;&nbsp;
+                <div style="width: 125px;display: flex;justify-content: space-between;">
+                    <span id="team1-batter1-name"></span>
+                    <span id="team1-batter1-score"></span>
+                </div>&nbsp;&nbsp;&nbsp;
+                <div style="width: 125px;display: flex;justify-content: space-between;">
+                    <span id="team1-batter2-name"></span>
+                    <span id="team1-batter2-score"></span>
+                </div>
+            </div>
+            <div id="over-lbl" style="padding-top: 10px;"></div>
+            <div id="right-bar">
+                <div style="width: 600px;display: flex;">
+                    <span style="display: flex;" id="over-balls">
+                        <!-- <span class="right-over-ball"></span> -->
+                    </span>
+                    &nbsp;&nbsp;
+                    <span style="display: flex;justify-content: space-between;align-items: center;width: 175px;">
+                        <span id="right-bowler-name"></span>
+                        <span id="right-bowler-info"></span>
+                    </span>
+                    &nbsp;&nbsp;
+                    <!-- <svg height="45" width="170">
+                        <circle cx="25" cy="10" r="10" stroke="white" stroke-width="1" fill="transparent" />
+                        <text x="20" y="15" fill="white"></text>
+                        <circle cx="50" cy="10" r="10" stroke="white" stroke-width="1" fill="transparent" />
+                        <text x="45" y="15" fill="white"></text>
+                        <circle cx="75" cy="10" r="10" stroke="white" stroke-width="1" fill="transparent" />
+                        <text x="70" y="15" fill="white"></text>
+                        <circle cx="100" cy="10" r="10" stroke="white" stroke-width="1" fill="transparent" />
+                        <text x="95" y="15" fill="white"></text>
+                        <circle cx="125" cy="10" r="10" stroke="white" stroke-width="1" fill="transparent" />
+                        <text x="120" y="15" fill="white"></text>
+                        <circle cx="150" cy="10" r="10" stroke="white" stroke-width="1" fill="transparent" />
+                        <text id="" x="145" y="15" fill="white"></text>
+                        <text x="15" fill="white" y="35">Bowler</text>
+                        <text x="125" fill="white" y="35">2-10</text>
+                        Error
+                    </svg> -->
+                </div>
+                <div id="team2-name" class="teamName"></div>
+            </div>
+        </div>
+        <div class="center">
+            <div class="runBall">
+                <span id="runs"></span>
+                /
+                <span id="wickets"></span>
+            </div>
+        </div>
+    </div>
+    <div id="review-screen" style="display: none;">
+        <div class="review-details-box" style="top: 5vh;">
+            <div class="review-top">Wicket</div>
+            <div class="review-bottom" id="review-wicket-lbl"></div>
+        </div>
+        <!-- Hitting/Missing -->
+        <div class="review-details-box" style="top: 30vh;">
+            <div class="review-top">impact</div>
+            <div class="review-bottom" id="review-impact-lbl"></div>
+        </div>
+        <!-- in line/off line -->
+        <div class="review-details-box" style="top: 55vh;">
+            <div class="review-top">Pitching</div>
+            <div class="review-bottom" id="review-pitching-lbl"></div>
+        </div>
+        
+        <div class="review-details-box" style="top: 80vh;">
+            <div class="review-top">Review By</div>
+            <div class="review-bottom" id="review-by-lbl"></div>
+        </div>
+        <div class="review-box" style="display: block;">
+            <div class="review-top">
+                Original Decision
+            </div>
+            <div class="review-bottom" id="review-original-lbl">
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function load() {
+        firebase.database().ref('sports/cricket/liveMatch').on('value', (snapshot) => {
+            matchData = snapshot.val();
+            if (matchData.review.open == true) {
+                document.getElementById('review-screen').style.display = 'block'
+                document.getElementById('main-scorebar').style.display = 'none'
+            } else {
+                document.getElementById('main-scorebar').style.display = 'block'
+                document.getElementById('review-screen').style.display = 'none'
+            }
+            //Review Screen
+            {
+                reviewData = matchData.review;
+                document.getElementById('review-original-lbl').innerHTML = reviewData.original;
+                document.getElementById('review-wicket-lbl').innerHTML = reviewData.wicket;
+                document.getElementById('review-impact-lbl').innerHTML = reviewData.impact;
+                document.getElementById('review-pitching-lbl').innerHTML = reviewData.pitching;
+                document.getElementById('review-by-lbl').innerHTML = reviewData.reviewBy;
+            }
+            //Center Area
+            {
+                document.getElementById('runs').innerHTML = matchData.center.runs;
+                document.getElementById('wickets').innerHTML = matchData.center.wickets;
+                overs_arr = matchData.overs;
+                balls = 0;
+                for (k = 0; k < overs_arr.length; k++) {
+                    for (b = 0; b < overs_arr[k].length; b++) {
+                        balls = balls + 1
+                    }
+                }
+                overs = Math.floor(balls / 6) + '.' + (balls % 6)
+                document.getElementById('over-lbl').innerHTML = `${overs} overs`;
+            }
+            //Top Area
+            {
+                overs_arr = matchData.overs;
+                balls = 0;
+                for (k = 0; k < overs_arr.length; k++) {
+                    for (b = 0; b < overs_arr[k].length; b++) {
+                        balls = balls + 1
+                    }
+                }
+                rr = matchData.center.runs / balls * 6
+                rr = rr.toFixed(2)
+                firebase.database().ref('sports/cricket/liveMatch/top/rr').set(rr)
+                estd = rr * matchData.center.matchLength
+                estd = Math.round(estd)
+                firebase.database().ref('sports/cricket/liveMatch/top/estd').set(estd)
+                rrr = 0
+                lbl = matchData.top.lbl;
+                lbl = lbl.replace('{{estd}}', estd)
+                lbl = lbl.replace('{{rr}}', rr)
+                lbl = lbl.replace('{{rrr}}', rrr)
+                document.getElementById('top-lbl').innerHTML = lbl;
+            }
+            //Left Bar
+            {
+                document.getElementById('team1-name').innerHTML = matchData.left.team1.name;
+
+                document.getElementById('team1-batter1-name').innerHTML = matchData.left.team1.batter1.name;
+                document.getElementById('team1-batter1-score').innerHTML = matchData.left.team1.batter1.score;
+
+                document.getElementById('team1-batter2-name').innerHTML = matchData.left.team1.batter2.name;
+                document.getElementById('team1-batter2-score').innerHTML = matchData.left.team1.batter2.score;
+                if (matchData.left.team1.batter1.onStrike == true) {
+                    document.getElementById('team1-batter1-name').innerHTML = '<span class="wh-bar"></span>&nbsp;' + matchData.left.team1.batter1.name;
+                    document.getElementById('team1-batter2-name').innerHTML = matchData.left.team1.batter2.name;
+                } else if (matchData.left.team1.batter2.onStrike == true) {
+                    document.getElementById('team1-batter2-name').innerHTML = '<span class="wh-bar"></span>&nbsp;' + matchData.left.team1.batter2.name;
+                    document.getElementById('team1-batter1-name').innerHTML = matchData.left.team1.batter1.name;
+                }
+            }
+            //Right Bar
+            {
+                document.getElementById('team2-name').innerHTML = matchData.right.team2.name;
+                document.getElementById('right-bowler-name').innerHTML = matchData.right.team2.bowler.name;
+                bowlerData = matchData.right.team2.bowler
+                bowler_overs = `${Math.floor(bowlerData.balls / 6)}.${Math.floor(bowlerData.balls % 6)}`
+                document.getElementById('right-bowler-info').innerHTML = `${bowlerData.wickets}/${bowlerData.score}&nbsp;${bowler_overs}`
+            }
+            //Load Over
+            {
+                overs = matchData.overs
+                for (i = 0; i < overs.length; i++) {
+                    over = overs[i]
+                    over_elem = document.getElementById('over-balls')
+                    over_elem.innerHTML = ''
+                    for (b = 0; b < over.length; b++) {
+                        over_elem.innerHTML += `<span class="right-over-ball">${over[b].score}</span>`
+                    }
+                }
+            }
+        })
+    }
+</script>
+<style>
+    .right-over-ball {
+        height: 25px;
+        border-radius: 200px;
+        border: 1px solid white;
+        width: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 2px;
+    }
+
+    .wh-bar {
+        background-color: white;
+        height: 22px;
+        padding: 2.5px;
+    }
+
+    .review-top {
+        text-transform: uppercase;
+        height: 50%;
+        width: 100%;
+        border-bottom: 1px solid black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .review-bottom {
+        text-transform: uppercase;
+        height: 50%;
+        width: 100%;
+        background-color: black;
+        color: white;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .review-details-box {
+        display: block;
+        position: absolute;
+        left: 30px;
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 10px;
+        width: 250px;
+        height: 15vh;
+        font-size: 22px;
+    }
+
+    .review-box {
+        display: flex;
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 10px;
+        width: 250px;
+        height: 100px;
+        font-size: 22px;
+    }
+
+    .topBar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+        width: 50vw;
+        height: 50px;
+        border-bottom-left-radius: 50px;
+        border-bottom-right-radius: 50px;
+        color: white;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .teamName {
+        font-size: 24px;
+    }
+
+    #left-bar {
+        padding-left: 10px;
+        width: 40vw;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+    }
+
+    #right-bar {
+        display: flex;
+        justify-content: right;
+        align-items: center;
+        padding-right: 10px;
+        width: 40vw;
+    }
+
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .runBall {
+        border-radius: 200px;
+        border: 3px solid black;
+        width: 75px;
+        height: 75px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        position: absolute;
+        z-index: 12px;
+        bottom: 30px;
+        font-size: 22px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .scorebar {
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: absolute;
+        bottom: 0px;
+        width: 100vw;
+        height: 50px;
+        background-color: black;
+        font-family: 'Poppins', sans-serif;
+    }
+</style>
+<!-- <style>
+    #left-scorebar {
+        background-color: black;
+        color: white;
+        width: 25vw;
+        height: 50px;
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 100px;
+        padding-right: 15px;
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Poppins',sans-serif;
+        align-items: center;
+        padding-left: 5px;
+    }
+
+    #centre-scorebar {
+        width: 100px;
+        font-size: 22px;
+        background-color: black;
+        color: white;
+        height: 50px;
+        border-radius: 200px;
+        text-align: center;
+        font-family: 'Poppins',sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #right-scorebar {
+        background-color: black;
+        color: white;
+        width: 25vw;
+        height: 50px;
+        border-top-left-radius: 100px;
+        border-bottom-left-radius: 100px;
+        padding-left: 15px;
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Poppins',sans-serif;
+        align-items: center;
+        padding-right: 5px;
+    }
+</style> -->
+<script>
+
+</script>
+
+</html>
