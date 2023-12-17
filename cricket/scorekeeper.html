@@ -6,8 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
     <!-- <script src="main.js"></script> -->
-    <script src="https://www.gstatic.com/firebasejs/7.6.2/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/live/3.1/firebase.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/7.6.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/live/10.7.1/firebase.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-database.js"></script>
+    
+
     <!-- <link rel="stylesheet" href="style.css"> -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <script>
@@ -79,6 +85,7 @@
                 <option value="baller">Baller</option>
                 <option value="batter">Batter</option>
             </select>
+            <hr>
             <select class="slct" id="review-impact-inp" oninput="reviewSwitchToggle()">
                 <option selected disabled value="">--Select impact--</option>
                 <option value=" ">-</option>
@@ -109,35 +116,35 @@
         if (switchState == true) {
             // /* 
             firebase.database().ref('sports/cricket/liveMatch/review').set({
-                 open:true,
-                 impact:document.getElementById('review-impact-inp').value,
-                 pitching:document.getElementById('review-pitching-inp').value,
-                 wicket:document.getElementById('review-wicket-inp').value,
-                 reviewBy:document.getElementById('review-by-inp').value,
-                 original:document.getElementById('review-original-inp').value,
-             })
+                open: true,
+                impact: document.getElementById('review-impact-inp').value,
+                pitching: document.getElementById('review-pitching-inp').value,
+                wicket: document.getElementById('review-wicket-inp').value,
+                reviewBy: document.getElementById('review-by-inp').value,
+                original: document.getElementById('review-original-inp').value,
+            })
             //  */
-        }else{
+        } else {
             firebase.database().ref('sports/cricket/liveMatch/review').set({
-                 open:false,
-                 impact:'',
-                 pitching:'',
-                 wicket:'',
-                 reviewBy:'',
-                 original:'',
-             })
-             document.getElementById('review-impact-inp').value = ''
-             document.getElementById('review-pitching-inp').value = ''
-             document.getElementById('review-wicket-inp').value = ''
-             document.getElementById('review-by-inp').value = ''
-             document.getElementById('review-original-inp').value = ''
+                open: false,
+                impact: '',
+                pitching: '',
+                wicket: '',
+                reviewBy: '',
+                original: '',
+            })
+            document.getElementById('review-impact-inp').value = ''
+            document.getElementById('review-pitching-inp').value = ''
+            document.getElementById('review-wicket-inp').value = ''
+            document.getElementById('review-by-inp').value = ''
+            document.getElementById('review-original-inp').value = ''
         }
     }
     function load() {
         firebase.database().ref('sports/cricket/liveMatch').on('value', (snapshot) => {
             matchData = snapshot.val();
             loadDropdowns()
-        })
+        },function(){})
     }
     function loadDropdowns() {
         players = {
