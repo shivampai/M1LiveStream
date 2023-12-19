@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase-database.js"></script>
-    
+
 
     <!-- <link rel="stylesheet" href="style.css"> -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
@@ -57,59 +57,80 @@
     <b>Other Details : </b>
     <div id="other-options">
         <div id="wickets-cont">
-            <select name="" class="slct" id="">
+            <select name="" class="slct-dark" id="">
                 <option value="" hidden>--Select--</option>
                 <option value="">Catchout</option>
                 <option value="">LBW</option>
                 <option value="">Run Out</option>
                 <option value="">Bowled Out</option>
             </select>
-            <select name="" class="fielders-dropdown slct" id=""></select>
+            <select name="" class="fielders-dropdown slct-dark" id=""></select>
         </div>
     </div>
     <hr>
-    <span>
-        <span>Review : </span>
-        <label class="switch">
-            <input type="checkbox" id="review-switch" onchange="reviewSwitchToggle()">
-            <span class="slider round"></span>
-        </label>
-        <div>
-            <select class="slct" id="review-original-inp">
-                <option selected disabled value="" oninput="reviewSwitchToggle()">--Original Decision--</option>
-                <option value="out">Out</option>
-                <option value="not out">Not Out</option>
-            </select>
-            <select class="slct" id="review-by-inp">
-                <option selected disabled value="" oninput="reviewSwitchToggle()">--Select review requester--</option>
-                <option value="baller">Baller</option>
-                <option value="batter">Batter</option>
-            </select>
-            <hr>
-            <select class="slct" id="review-impact-inp" oninput="reviewSwitchToggle()">
-                <option selected disabled value="">--Select impact--</option>
-                <option value=" ">-</option>
-                <option value="in line">In Line</option>
-                <option value="off line">Off Line</option>
-            </select>
-            <select class="slct" id="review-pitching-inp" oninput="reviewSwitchToggle()">
-                <option selected disabled value="">--Select pitching--</option>
-                <option value=" ">-</option>
-                <option value="in line">In Line</option>
-                <option value="off line">Off Line</option>
-            </select>
-            <select class="slct" id="review-wicket-inp" oninput="reviewSwitchToggle()">
-                <option selected disabled value="">--Select wickets--</option>
-                <option value=" ">-</option>
-                <option value="missing">Missing</option>
-                <option value="hitting">Hitting</option>
-            </select>
+    <button class="button w-100" onclick="document.getElementById('review-modal').style.display = 'flex';">Apply For
+        Review</button>
+    <div class="modal" id="review-modal">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Review</h2>
+                    <button class="close-btn" onclick="document.getElementById('review-modal').style.display = 'none'">Close</button>
+                </div>
+                <div>
+                    <select class="slct" id="review-original-inp">
+                        <option selected disabled value="" oninput="reviewSwitchToggle()">--Original Decision--</option>
+                        <option value="out">Out</option>
+                        <option value="not out">Not Out</option>
+                    </select>
 
+                    <select class="slct" id="review-by-inp">
+                        <option selected disabled value="" oninput="reviewSwitchToggle()">--Select review requester--
+                        </option>
+                        <option value="baller">Baller</option>
+                        <option value="batter">Batter</option>
+                    </select>
+                    <hr>
+                    <span>Show Review Screen</span>
+                    <label class="switch">
+                        <input type="checkbox" id="review-switch" onchange="reviewSwitchToggle()">
+                        <span class="slider round"></span>
+                    </label>
+                    <hr>
+                    <select class="slct" id="review-impact-inp" oninput="reviewSwitchToggle()">
+                        <option selected disabled value="">--Select impact--</option>
+                        <option value=" ">-</option>
+                        <option value="in line">In Line</option>
+                        <option value="off line">Off Line</option>
+                    </select>
+                    <select class="slct" id="review-pitching-inp" oninput="reviewSwitchToggle()">
+                        <option selected disabled value="">--Select pitching--</option>
+                        <option value=" ">-</option>
+                        <option value="in line">In Line</option>
+                        <option value="off line">Off Line</option>
+                    </select>
+                    <select class="slct" id="review-wicket-inp" oninput="reviewSwitchToggle()">
+                        <option selected disabled value="">--Select wickets--</option>
+                        <option value=" ">-</option>
+                        <option value="missing">Missing</option>
+                        <option value="hitting">Hitting</option>
+                    </select>
 
+                </div>
+            </div>
         </div>
+    </div>
+
+    <span>
+
     </span>
 </body>
 <script>
+    function assignBall(txt){
+        if(txt == "W"){
+            console.log('Out')
+        }
+    }
     function reviewSwitchToggle() {
         switchState = document.getElementById('review-switch').checked
         console.log(switchState)
@@ -124,7 +145,8 @@
                 original: document.getElementById('review-original-inp').value,
             })
             //  */
-        } else {
+        }
+         else {
             firebase.database().ref('sports/cricket/liveMatch/review').set({
                 open: false,
                 impact: '',
@@ -136,15 +158,15 @@
             document.getElementById('review-impact-inp').value = ''
             document.getElementById('review-pitching-inp').value = ''
             document.getElementById('review-wicket-inp').value = ''
-            document.getElementById('review-by-inp').value = ''
-            document.getElementById('review-original-inp').value = ''
+            // document.getElementById('review-by-inp').value = ''
+            // document.getElementById('review-original-inp').value = ''
         }
     }
     function load() {
         firebase.database().ref('sports/cricket/liveMatch').on('value', (snapshot) => {
             matchData = snapshot.val();
             loadDropdowns()
-        },function(){})
+        }, function () { })
     }
     function loadDropdowns() {
         players = {
@@ -161,7 +183,79 @@
         }
     }
 </script>
+<!-- modal.css -->
 <style>
+    .modal-header {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .close-btn {
+        background-color: transparent;
+        border: none;
+        outline: none;
+    }
+
+    .modal {
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        position: absolute;
+        top: 0px;
+        z-index: 1000;
+        height: 100vh;
+        width: 100vw;
+    }
+
+    @keyframes modalAnim {
+        from {
+            bottom: -55vh;
+        }
+
+        to {
+            bottom: 0;
+        }
+    }
+
+    .modal-content {
+        padding: 5px 15px 5px 15px;
+    }
+
+    .modal-box {
+        background-color: white;
+        color: black !important;
+        /* display: flex; */
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 1001;
+        width: 100vw;
+        height: 55vh;
+        border-top-right-radius: 50px;
+        border-top-left-radius: 50px;
+        animation: modalAnim 0.25s ease-in;
+    }
+</style>
+<style>
+    body {
+        font-family: 'Lato', sans-serif;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .button {
+        background-color: black;
+        color: white;
+        outline: none;
+        border: 1px solid white;
+        border-radius: 5px;
+        font-size: 22px;
+        padding: 12px 6px 12px 6px;
+        /* margin: 5px; */
+    }
+
     .switch {
         position: relative;
         display: inline-block;
@@ -225,6 +319,15 @@
     }
 
     .slct {
+        background-color: #fff;
+        border-radius: 5px;
+        color: #1f1f1f;
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+    }
+
+    .slct-dark {
         background-color: #1f1f1f;
         border-radius: 5px;
         color: white;
