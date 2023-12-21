@@ -57,14 +57,32 @@
     <b>Other Details : </b>
     <div id="other-options">
         <div id="wickets-cont">
-            <select name="" class="slct-dark" id="">
-                <option value="" hidden>--Select--</option>
-                <option value="">Catchout</option>
-                <option value="">LBW</option>
-                <option value="">Run Out</option>
-                <option value="">Bowled Out</option>
-            </select>
-            <select name="" class="fielders-dropdown slct-dark" id=""></select>
+        </div>
+        <div class="modal" id="wicket-modal">
+            <div class="modal-box">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Wicket Details</h2> <button class="close-btn"
+                            onclick="document.getElementById('wicket-modal').style.display = 'none'">Close</button>
+                    </div>
+                    <select name="" class="slct" id="wicket-how">
+                        <option value="" hidden>--How Player Got Out--</option>
+                        <option value="">Catchout</option>
+                        <option value="">LBW</option>
+                        <option value="">Run Out</option>
+                        <option value="">Clean Bowled</option>
+                    </select>
+                    <select name="" class="slct" id="wicket-catcher">
+                        <option disabled selected value="">--Select Catcher--</option>
+                        <option value="-">None</option>
+                        <optgroup class="fielders-dropdown" label="Players"></optgroup>
+                    </select>
+                    <hr>
+                    <input type="text" placeholder="New Batter">
+                    <hr>
+                    <button class="button w-100">Done</button>
+                </div>
+            </div>
         </div>
     </div>
     <hr>
@@ -75,7 +93,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Review</h2>
-                    <button class="close-btn" onclick="document.getElementById('review-modal').style.display = 'none'">Close</button>
+                    <button class="close-btn"
+                        onclick="document.getElementById('review-modal').style.display = 'none'">Close</button>
                 </div>
                 <div>
                     <select class="slct" id="review-original-inp">
@@ -126,9 +145,10 @@
     </span>
 </body>
 <script>
-    function assignBall(txt){
-        if(txt == "W"){
+    function assignBall(txt) {
+        if (txt == "W") {
             console.log('Out')
+            document.getElementById('wicket-modal').style.display = 'flex';
         }
     }
     function reviewSwitchToggle() {
@@ -146,7 +166,7 @@
             })
             //  */
         }
-         else {
+        else {
             firebase.database().ref('sports/cricket/liveMatch/review').set({
                 open: false,
                 impact: '',
@@ -205,6 +225,7 @@
         z-index: 1000;
         height: 100vh;
         width: 100vw;
+        font-family: 'Lato',sans-serif;
     }
 
     @keyframes modalAnim {
@@ -237,6 +258,15 @@
     }
 </style>
 <style>
+    input{
+        background-color: white;
+        outline: none;
+        border: 1px solid black;
+        border-radius: 5px;
+        padding: 15px 0px 15px 5px;
+        width: 100%;
+        font-size: 18px;
+    }
     body {
         font-family: 'Lato', sans-serif;
     }
@@ -246,6 +276,7 @@
     }
 
     .button {
+        font-family: 'Lato',sans-serif;
         background-color: black;
         color: white;
         outline: none;
@@ -325,6 +356,7 @@
         width: 100%;
         padding: 10px;
         font-size: 18px;
+        font-family: 'Lato',sans-serif;
     }
 
     .slct-dark {
@@ -334,6 +366,7 @@
         width: 100%;
         padding: 10px;
         font-size: 18px;
+        font-family: 'Lato',sans-serif;
     }
 
     .bg-b {
