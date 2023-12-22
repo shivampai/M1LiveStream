@@ -103,7 +103,7 @@
             <div class="review-top">Pitching</div>
             <div class="review-bottom" id="review-pitching-lbl"></div>
         </div>
-        
+
         <div class="review-details-box" style="top: 80vh;">
             <div class="review-top">Review By</div>
             <div class="review-bottom" id="review-by-lbl"></div>
@@ -156,23 +156,32 @@
             {
                 overs_arr = matchData.overs;
                 balls = 0;
-                for (k = 0; k < overs_arr.length; k++) {
-                    for (b = 0; b < overs_arr[k].length; b++) {
-                        balls = balls + 1
-                    }
+                for (k = 0; k < overs_arr.length - 1; k++) {
+                    balls += 6
+                    // for (b = 0; b < overs_arr[k].length; b++) {
+                    //     balls = balls + 1
+                    // }
                 }
-                rr = matchData.center.runs / balls * 6
-                rr = rr.toFixed(2)
-                firebase.database().ref('sports/cricket/liveMatch/top/rr').set(rr)
-                estd = rr * matchData.center.matchLength
-                estd = Math.round(estd)
-                firebase.database().ref('sports/cricket/liveMatch/top/estd').set(estd)
-                rrr = 0
+                if (!balls == 0) {
+                    rr = matchData.center.runs / balls
+                    rr = rr.toFixed(2)
+                    firebase.database().ref('sports/cricket/liveMatch/top/rr').set(rr)
+                    estd = rr * matchData.center.matchLength
+                    estd = Math.round(estd)
+                    firebase.database().ref('sports/cricket/liveMatch/top/estd').set(estd)
+                    rrr = 0
+                    lbl = matchData.top.lbl;
+                    lbl = lbl.replace('{{estd}}', estd)
+                    lbl = lbl.replace('{{rr}}', rr)
+                    lbl = lbl.replace('{{rrr}}', rrr)
+                    document.getElementById('top-lbl').innerHTML = lbl;
+                }
                 lbl = matchData.top.lbl;
-                lbl = lbl.replace('{{estd}}', estd)
-                lbl = lbl.replace('{{rr}}', rr)
-                lbl = lbl.replace('{{rrr}}', rrr)
+                lbl = lbl.replace('{{estd}}', 0)
+                lbl = lbl.replace('{{rr}}', 0)
+                lbl = lbl.replace('{{rrr}}', 0)
                 document.getElementById('top-lbl').innerHTML = lbl;
+
             }
             //Left Bar
             {
@@ -211,7 +220,7 @@
                     }
                 }
             }
-        },function(){})
+        }, function () { })
     }
 </script>
 <style>
