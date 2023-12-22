@@ -141,14 +141,15 @@
             {
                 document.getElementById('runs').innerHTML = matchData.center.runs;
                 document.getElementById('wickets').innerHTML = matchData.center.wickets;
-                overs_arr = matchData.overs;
-                balls = 0;
-                for (k = 0; k < overs_arr.length; k++) {
-                    for (b = 0; b < overs_arr[k].length; b++) {
-                        balls = balls + 1
-                    }
-                }
-                overs = Math.floor(balls / 6) + '.' + (balls % 6)
+                overs = matchData.center.overs;
+                // overs_arr = matchData.overs;
+                // balls = 0;
+                // for (k = 0; k < overs_arr.length; k++) {
+                //     for (b = 0; b < overs_arr[k].length; b++) {
+                //         balls = balls + 1
+                //     }
+                // }
+                // overs = Math.floor(balls / 6) + '.' + (balls % 6)
                 document.getElementById('over-lbl').innerHTML = `${overs} overs`;
             }
             //Top Area
