@@ -175,13 +175,13 @@
                     lbl = lbl.replace('{{rr}}', rr)
                     lbl = lbl.replace('{{rrr}}', rrr)
                     document.getElementById('top-lbl').innerHTML = lbl;
+                } else {
+                    lbl = matchData.top.lbl;
+                    lbl = lbl.replace('{{estd}}', 0)
+                    lbl = lbl.replace('{{rr}}', 0)
+                    lbl = lbl.replace('{{rrr}}', 0)
+                    document.getElementById('top-lbl').innerHTML = lbl;
                 }
-                lbl = matchData.top.lbl;
-                lbl = lbl.replace('{{estd}}', 0)
-                lbl = lbl.replace('{{rr}}', 0)
-                lbl = lbl.replace('{{rrr}}', 0)
-                document.getElementById('top-lbl').innerHTML = lbl;
-
             }
             //Left Bar
             {
