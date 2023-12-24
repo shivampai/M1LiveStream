@@ -141,15 +141,8 @@
             {
                 document.getElementById('runs').innerHTML = matchData.center.runs;
                 document.getElementById('wickets').innerHTML = matchData.center.wickets;
-                overs = matchData.center.overs;
-                // overs_arr = matchData.overs;
-                // balls = 0;
-                // for (k = 0; k < overs_arr.length; k++) {
-                //     for (b = 0; b < overs_arr[k].length; b++) {
-                //         balls = balls + 1
-                //     }
-                // }
-                // overs = Math.floor(balls / 6) + '.' + (balls % 6)
+                balls = matchData.center.balls;
+                overs = Math.floor(balls / 6) + '.' + (balls % 6)
                 document.getElementById('over-lbl').innerHTML = `${overs} overs`;
             }
             //Top Area
@@ -193,10 +186,10 @@
                 document.getElementById('team1-batter2-name').innerHTML = matchData.left.team1.batter2.name;
                 document.getElementById('team1-batter2-score').innerHTML = matchData.left.team1.batter2.score;
                 if (matchData.left.team1.batter1.onStrike == true) {
-                    document.getElementById('team1-batter1-name').innerHTML = '<span class="wh-bar"></span>&nbsp;' + matchData.left.team1.batter1.name;
+                    document.getElementById('team1-batter1-name').innerHTML = '$#10148;&nbsp;' + matchData.left.team1.batter1.name;
                     document.getElementById('team1-batter2-name').innerHTML = matchData.left.team1.batter2.name;
                 } else if (matchData.left.team1.batter2.onStrike == true) {
-                    document.getElementById('team1-batter2-name').innerHTML = '<span class="wh-bar"></span>&nbsp;' + matchData.left.team1.batter2.name;
+                    document.getElementById('team1-batter2-name').innerHTML = '&#10148&nbsp;' + matchData.left.team1.batter2.name;
                     document.getElementById('team1-batter1-name').innerHTML = matchData.left.team1.batter1.name;
                 }
             }
@@ -215,7 +208,7 @@
                     over = overs[i]
                     over_elem = document.getElementById('over-balls')
                     over_elem.innerHTML = ''
-                    for (b = 0; b < over.length; b++) {
+                    for (b = 1; b < over.length; b++) {
                         over_elem.innerHTML += `<span class="right-over-ball">${over[b].score}</span>`
                     }
                 }
