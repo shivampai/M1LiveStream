@@ -43,8 +43,28 @@
         <label class="h1">12-1 (1.0)</label>
     </div>
     <hr>
+    <select name="" id="" class="batsman-dropdown slct-dark"></select>
+    <button class="button w-100" onclick="document.getElementById('new-over-modal').style.display = 'flex'">New
+        Over</button>
+    <div class="modal" id="new-over-modal">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>New Over</h2>
+                    <button class="close-btn"
+                        onclick="document.getElementById('new-over-modal').style.display = 'none'">Close</button>
+                </div>
+                <select name="" id="new-over-bowler" class="slct">
+                    <option selected disabled>--Select Bowler--</option>
+                    <optgroup label="Select : " class="fielders-dropdown"></optgroup>
+                </select>
+                <button class="button w-100" onclick="createNewOver()">Create</button>
+            </div>
+        </div>
+    </div>
     <b>New Delivery : </b>
     <div class="d-flex">
+        <button class="ball-assign" onclick="assignBall(this.innerHTML)">0</button>
         <button class="ball-assign" onclick="assignBall(this.innerHTML)">1</button>
         <button class="ball-assign" onclick="assignBall(this.innerHTML)">2</button>
         <button class="ball-assign" onclick="assignBall(this.innerHTML)">3</button>
@@ -62,7 +82,8 @@
             <div class="modal-box">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>Wicket Details</h2> <button class="close-btn"
+                        <h2>Wicket Details</h2>
+                        <button class="close-btn"
                             onclick="document.getElementById('wicket-modal').style.display = 'none'">Close</button>
                     </div>
                     <select name="" class="slct" id="wicket-how">
@@ -71,6 +92,7 @@
                         <option value="">LBW</option>
                         <option value="">Run Out</option>
                         <option value="">Clean Bowled</option>
+
                     </select>
                     <select name="" class="slct" id="wicket-catcher">
                         <option disabled selected value="">--Select Catcher--</option>
@@ -139,17 +161,24 @@
             </div>
         </div>
     </div>
-
-    <span>
-
-    </span>
 </body>
 <script>
     function assignBall(txt) {
         if (txt == "W") {
             console.log('Out')
             document.getElementById('wicket-modal').style.display = 'flex';
+            addRuns('W',0,'123','122')
+        } else if (txt == 'NB') {
+            console.log('');
+        } else if (txt == 'Wd') {
+
         }
+    }
+    function addRuns(title, runs, baller, batter) {
+        // firebase.database().ref('sports/cricket/liveMatch').once('value',(snapshot)=>{
+        //     var overs = snapshot.val()
+        // })
+        firebase.database().ref()
     }
     function reviewSwitchToggle() {
         switchState = document.getElementById('review-switch').checked
@@ -185,22 +214,46 @@
     function load() {
         firebase.database().ref('sports/cricket/liveMatch').on('value', (snapshot) => {
             matchData = snapshot.val();
+            overs_arr = []
+            overs_arr = matchData.overs;
             loadDropdowns()
         }, function () { })
     }
     function loadDropdowns() {
-        players = {
-            fielders: [
-                { name: 'SP1' }, { name: 'SP2' }, { name: 'SP3' }
-            ], batters: []
-        }
-        elems = document.getElementsByClassName('fielders-dropdown')
-        for (i = 0; i < elems.length; i++) {
-            elems[i].innerHTML = '<option hidden>--Select Player--</option>'
-            for (k = 0; k < players.fielders.length; k++) {
-                elems[i].innerHTML += `<option>${players.fielders[k].name}</option>`
+        // players = {
+        //     fielders: [
+        //         { name: 'SP1', score: 0, wickets: 1, balls: 2 }, { name: 'SP2', score: 0, wickets: 1, balls: 2 }, { name: 'SP3', score: 0, wickets: 1, balls: 2 }
+        //     ]
+        // }
+        // firebase.database().ref('/sports/cricket/liveMatch/right/team2/players').set(players.fielders)
+        firebase.database().ref('/sports/cricket/liveMatch/right/team2/players').once('value', (snapshot) => {
+            t2players = snapshot.val();
+            elems = document.getElementsByClassName('fielders-dropdown')
+            for (i = 0; i < elems.length; i++) {
+                elems[i].innerHTML = '<option hidden>--Select Player--</option>'
+                for (k = 0; k < t2players.length; k++) {
+                    elems[i].innerHTML += `<option>${t2players[k].name}</option>`
+                }
             }
-        }
+        });
+        firebase.database().ref('/sports/cricket/liveMatch/left/team1').once('value', (snapshot) => {
+            t1batters = snapshot.val()
+            t1batter1 = t1batters.batter1
+            t1batter2 = t1batters.batter2
+            elems = document.getElementsByClassName('batsman-dropdown')
+            for (i = 0; i < elems.length; i++) {
+                elems[i].innerHTML = '<option disabled selected>--Select Batter--</option>'
+                elems[i].innerHTML += `<option>${t1batter1.name}</option>`
+                elems[i].innerHTML += `<option>${t1batter2.name}</option>`
+            }
+        });
+    }
+    function createNewOver() {
+        // overs_arr = [[{ null: true }, { batter: 'SP1', bowler: 'SP2', score: 'NB' }, { batter: 'SP1', bowler: 'SP2', score: 'W' }, { batter: 'SP3', bowler: 'SP2', score: '2' }, { batter: 'SP3', bowler: 'SP2', score: '1' }]]
+        ref = firebase.database().ref('/sports/cricket/liveMatch/overs');
+        // .set(overs_arr)
+        overs_arr.push([{ null: true }])
+        ref.set(overs_arr)
     }
 </script>
 <!-- modal.css -->
@@ -225,7 +278,7 @@
         z-index: 1000;
         height: 100vh;
         width: 100vw;
-        font-family: 'Lato',sans-serif;
+        font-family: 'Lato', sans-serif;
     }
 
     @keyframes modalAnim {
@@ -258,7 +311,7 @@
     }
 </style>
 <style>
-    input{
+    input {
         background-color: white;
         outline: none;
         border: 1px solid black;
@@ -267,6 +320,7 @@
         width: 100%;
         font-size: 18px;
     }
+
     body {
         font-family: 'Lato', sans-serif;
     }
@@ -276,7 +330,7 @@
     }
 
     .button {
-        font-family: 'Lato',sans-serif;
+        font-family: 'Lato', sans-serif;
         background-color: black;
         color: white;
         outline: none;
@@ -356,7 +410,7 @@
         width: 100%;
         padding: 10px;
         font-size: 18px;
-        font-family: 'Lato',sans-serif;
+        font-family: 'Lato', sans-serif;
     }
 
     .slct-dark {
@@ -366,7 +420,7 @@
         width: 100%;
         padding: 10px;
         font-size: 18px;
-        font-family: 'Lato',sans-serif;
+        font-family: 'Lato', sans-serif;
     }
 
     .bg-b {
