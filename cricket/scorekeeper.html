@@ -37,13 +37,13 @@
 
 <body onload="load()" style="width: 100vw !important;margin: 0px;">
     <div class="center">
-        <label class="h2">Team 1 v/s Team 2</label>
+        <label class="h2" id="team-names"></label>
     </div>
     <div class="center">
-        <label class="h1">12-1 (1.0)</label>
+        <label class="h1" id="scorecard"></label>
     </div>
     <hr>
-    <select name="" id="" class="batsman-dropdown slct-dark"></select>
+    <select name="" id="batsman-on-strike" onchange="batterOnStrike(this.value,this)" class="batsman-dropdown slct-dark"></select>
     <button class="button w-100" onclick="document.getElementById('new-over-modal').style.display = 'flex'">New
         Over</button>
     <div class="modal" id="new-over-modal">
@@ -62,48 +62,35 @@
             </div>
         </div>
     </div>
-    <b>New Delivery : </b>
-    <div class="d-flex">
-        <button class="ball-assign" onclick="assignBall(this.innerHTML)">0</button>
-        <button class="ball-assign" onclick="assignBall(this.innerHTML)">1</button>
-        <button class="ball-assign" onclick="assignBall(this.innerHTML)">2</button>
-        <button class="ball-assign" onclick="assignBall(this.innerHTML)">3</button>
-        <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">4</button>
-        <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">6</button>
-        <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Wd</button>
-        <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">NB</button>
-        <button class="ball-assign bg-pink" onclick="assignBall(this.innerHTML)">W</button>
-    </div>
-    <b>Other Details : </b>
-    <div id="other-options">
-        <div id="wickets-cont">
-        </div>
-        <div class="modal" id="wicket-modal">
-            <div class="modal-box">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Wicket Details</h2>
-                        <button class="close-btn"
-                            onclick="document.getElementById('wicket-modal').style.display = 'none'">Close</button>
-                    </div>
-                    <select name="" class="slct" id="wicket-how">
-                        <option value="" hidden>--How Player Got Out--</option>
-                        <option value="">Catchout</option>
-                        <option value="">LBW</option>
-                        <option value="">Run Out</option>
-                        <option value="">Clean Bowled</option>
-
-                    </select>
-                    <select name="" class="slct" id="wicket-catcher">
-                        <option disabled selected value="">--Select Catcher--</option>
-                        <option value="-">None</option>
-                        <optgroup class="fielders-dropdown" label="Players"></optgroup>
-                    </select>
-                    <hr>
-                    <input type="text" placeholder="New Batter">
-                    <hr>
-                    <button class="button w-100">Done</button>
+    <div class="modal" id="wicket-modal">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Wicket Details</h2>
+                    <button class="close-btn"
+                        onclick="document.getElementById('wicket-modal').style.display = 'none'">Close</button>
                 </div>
+                <select name="" class="slct" id="">
+                    <option value="" selected disabled>--Who got Out--</option>
+                    <optgroup class="batsman-dropdown" label="Players"></optgroup>
+                </select>
+                <select name="" class="slct" id="wicket-how">
+                    <option value="" hidden>--How Player Got Out--</option>
+                    <option value="">Catchout</option>
+                    <option value="">LBW</option>
+                    <option value="">Run Out</option>
+                    <option value="">Clean Bowled</option>
+
+                </select>
+                <select name="" class="slct" id="wicket-catcher">
+                    <option disabled selected value="">--Select Catcher--</option>
+                    <option value="-">None</option>
+                    <optgroup class="fielders-dropdown" label="Players"></optgroup>
+                </select>
+                <hr>
+                <input type="text" placeholder="New Batter">
+                <hr>
+                <button class="button w-100">Done</button>
             </div>
         </div>
     </div>
@@ -161,24 +148,88 @@
             </div>
         </div>
     </div>
+    <b>New Delivery : </b>
+    <div class="balls-cont">
+        <div>
+            <button class="ball-assign" onclick="assignBall(this.innerHTML)">0</button>
+            <button class="ball-assign" onclick="assignBall(this.innerHTML)">1</button>
+            <button class="ball-assign" onclick="assignBall(this.innerHTML)">2</button>
+            <button class="plain-button" style="width: 25vw;color: turquoise;"
+                onclick="undoAssignedBall()">UNDO</button>
+        </div>
+        <div>
+            <button class="ball-assign" onclick="assignBall(this.innerHTML)">3</button>
+            <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">4</button>
+            <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">6</button>
+            <button class="plain-button" onclick="assignBall('W')" style="width: 25vw;color: red;">OUT</button>
+        </div>
+        <div>
+            <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Wd</button>
+            <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">NB</button>
+            <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">LB</button>
+            <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Dead ball</button>
+        </div>
+    </div>
 </body>
 <script>
+    function batterOnStrike(batter,elem){
+        elem.value = batter
+        console.log(batter)
+        if(batter == 'batter1'){
+            firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/onStrike').set(true)
+            firebase.database().ref('sports/cricket/liveMatch/left/team1/batter2/onStrike').set(false)
+        }else if(batter == 'batter2'){
+            firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/onStrike').set(false)
+            firebase.database().ref('sports/cricket/liveMatch/left/team1/batter2/onStrike').set(true)
+        }
+    }
+    function undoAssignedBall() {
+        ov = overs_arr[overs_arr.length - 1]
+        if (ov.length == 1) { } else {
+            toDelete = ov[ov.length - 1]
+            if (ov[ov.length - 1].counted == true) {
+                ov.splice(ov.length - 1, 1)
+                firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
+                firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls - 1)
+
+            } else {
+                ov.splice(ov.length - 1, 1)
+                firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
+            }
+            if (toDelete == "W") {
+            } else if (toDelete == 'NB') {
+            } else if (toDelete == 'Wd') {
+            } else if (toDelete == 'Dead ball') {
+            } else if (toDelete == 'LB') {
+            } else {
+                firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - Number(toDelete.score))
+            }
+        }
+    }
     function assignBall(txt) {
         if (txt == "W") {
             console.log('Out')
             document.getElementById('wicket-modal').style.display = 'flex';
-            addRuns('W',0,'123','122')
         } else if (txt == 'NB') {
             console.log('');
         } else if (txt == 'Wd') {
 
+        } else if (txt == 'Dead ball') {
+
+        } else if (txt == 'LB') {
+
+        } else {
+            addRuns(txt, Number(txt), 'Bowler', 'Batter', true)
         }
     }
-    function addRuns(title, runs, baller, batter) {
-        // firebase.database().ref('sports/cricket/liveMatch').once('value',(snapshot)=>{
-        //     var overs = snapshot.val()
-        // })
-        firebase.database().ref()
+    function addRuns(title, runs, baller, batter, ballCounted) {
+        overs_arr[overs_arr.length - 1].push({ batter: batter, bowler: baller, score: title, counted: ballCounted })
+        firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
+        if (ballCounted == true) {
+            balls += 1
+            firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls)
+        }
+        firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) + Number(runs))
     }
     function reviewSwitchToggle() {
         switchState = document.getElementById('review-switch').checked
@@ -214,8 +265,13 @@
     function load() {
         firebase.database().ref('sports/cricket/liveMatch').on('value', (snapshot) => {
             matchData = snapshot.val();
-            overs_arr = []
+            balls = matchData.center.balls;
+            overs_arr = [];
             overs_arr = matchData.overs;
+            mainData = matchData.center;
+            document.getElementById('team-names').innerHTML = matchData.left.team1.name + ' v/s ' + matchData.right.team2.name
+            overs = Math.floor(Number(balls) / 6) + '.' + (Number(balls % 6))
+            document.getElementById('scorecard').innerHTML = `${matchData.center.runs}-${matchData.center.wickets} (${overs})`
             loadDropdowns()
         }, function () { })
     }
@@ -242,9 +298,9 @@
             t1batter2 = t1batters.batter2
             elems = document.getElementsByClassName('batsman-dropdown')
             for (i = 0; i < elems.length; i++) {
-                elems[i].innerHTML = '<option disabled selected>--Select Batter--</option>'
-                elems[i].innerHTML += `<option>${t1batter1.name}</option>`
-                elems[i].innerHTML += `<option>${t1batter2.name}</option>`
+                elems[i].innerHTML = '<option hidden>--Select Batter--</option>'
+                elems[i].innerHTML += `<option value="batter1">${t1batter1.name}</option>`
+                elems[i].innerHTML += `<option value="batter2">${t1batter2.name}</option>`
             }
         });
     }
@@ -311,6 +367,24 @@
     }
 </style>
 <style>
+    .plain-button {
+        background-color: transparent;
+        border: none;
+        outline: none;
+        color: white;
+        font-size: 22px;
+    }
+
+    .balls-cont {
+        width: 100vw;
+        display: block;
+    }
+
+    .balls-cont div {
+        display: flex;
+        width: 100%;
+    }
+
     input {
         background-color: white;
         outline: none;
@@ -439,8 +513,8 @@
     }
 
     .ball-assign {
-        width: 12.5vw;
-        height: 12.5vw;
+        width: 25vw;
+        height: 25vw;
         font-size: 22px;
         font-family: 'Orbitron', sans-serif;
         border-radius: 10px;
