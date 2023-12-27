@@ -43,7 +43,16 @@
         <label class="h1" id="scorecard"></label>
     </div>
     <hr>
-    <select name="" id="batsman-on-strike" onchange="batterOnStrike(this.value,this)" class="batsman-dropdown slct-dark"></select>
+    <!-- <select name="" id="batsman-on-strike" onchange="batterOnStrike(this.value)"
+        class="batsman-dropdown slct-dark"></select> -->
+    <b>Batter On Strike : </b>
+    <div style="display: flex;width: 100vw;">
+        <button class="button" onclick="batterOnStrike('batter1')" style="width: 50vw;"
+            id="strike-btn-batter1">Batter1</button>
+        <button class="button" onclick="batterOnStrike('batter2')" style="width: 50vw;"
+            id="strike-btn-batter2">Batter2</button>
+    </div>
+    <hr>
     <button class="button w-100" onclick="document.getElementById('new-over-modal').style.display = 'flex'">New
         Over</button>
     <div class="modal" id="new-over-modal">
@@ -70,27 +79,32 @@
                     <button class="close-btn"
                         onclick="document.getElementById('wicket-modal').style.display = 'none'">Close</button>
                 </div>
-                <select name="" class="slct" id="">
+                <select name="" class="slct" id="wicket-who-got-out">
                     <option value="" selected disabled>--Who got Out--</option>
                     <optgroup class="batsman-dropdown" label="Players"></optgroup>
                 </select>
-                <select name="" class="slct" id="wicket-how">
+                <!--
+                    <select name="" class="slct" id="wicket-how">
                     <option value="" hidden>--How Player Got Out--</option>
                     <option value="">Catchout</option>
                     <option value="">LBW</option>
                     <option value="">Run Out</option>
                     <option value="">Clean Bowled</option>
-
+                    <option value="">Ball Lost</option>
+                    <option value="">Hit Wicket</option>
                 </select>
-                <select name="" class="slct" id="wicket-catcher">
+            -->
+                <!--
+                    <select name="" class="slct" id="wicket-catcher">
                     <option disabled selected value="">--Select Catcher--</option>
                     <option value="-">None</option>
                     <optgroup class="fielders-dropdown" label="Players"></optgroup>
                 </select>
+            -->
                 <hr>
                 <input type="text" placeholder="New Batter">
                 <hr>
-                <button class="button w-100">Done</button>
+                <button class="button w-100" onclick="regWicket()">Done</button>
             </div>
         </div>
     </div>
@@ -151,16 +165,16 @@
     <b>New Delivery : </b>
     <div class="balls-cont">
         <div>
+            <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">4</button>
             <button class="ball-assign" onclick="assignBall(this.innerHTML)">0</button>
             <button class="ball-assign" onclick="assignBall(this.innerHTML)">1</button>
-            <button class="ball-assign" onclick="assignBall(this.innerHTML)">2</button>
             <button class="plain-button" style="width: 25vw;color: turquoise;"
                 onclick="undoAssignedBall()">UNDO</button>
         </div>
         <div>
-            <button class="ball-assign" onclick="assignBall(this.innerHTML)">3</button>
-            <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">4</button>
             <button class="ball-assign bg-b" onclick="assignBall(this.innerHTML)">6</button>
+            <button class="ball-assign" onclick="assignBall(this.innerHTML)">2</button>
+            <button class="ball-assign" onclick="assignBall(this.innerHTML)">3</button>
             <button class="plain-button" onclick="assignBall('W')" style="width: 25vw;color: red;">OUT</button>
         </div>
         <div>
@@ -172,37 +186,55 @@
     </div>
 </body>
 <script>
-    function batterOnStrike(batter,elem){
-        elem.value = batter
-        console.log(batter)
-        if(batter == 'batter1'){
+    function regWicket() {
+        bowler = document.getElementById('new-over-bowler').value;
+        addRuns('W', 0, bowler, document.getElementById('wicket-who-got-out').value, true)
+    }
+    function batterOnStrike(batter) {
+        if (batter == 'batter1') {
             firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/onStrike').set(true)
             firebase.database().ref('sports/cricket/liveMatch/left/team1/batter2/onStrike').set(false)
-        }else if(batter == 'batter2'){
+
+            document.getElementById('strike-btn-batter1').className = 'button strike-active'
+            document.getElementById('strike-btn-batter2').className = 'button'
+        } else if (batter == 'batter2') {
             firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/onStrike').set(false)
             firebase.database().ref('sports/cricket/liveMatch/left/team1/batter2/onStrike').set(true)
+
+            document.getElementById('strike-btn-batter1').className = 'button'
+            document.getElementById('strike-btn-batter2').className = 'button strike-active'
         }
     }
     function undoAssignedBall() {
         ov = overs_arr[overs_arr.length - 1]
         if (ov.length == 1) { } else {
             toDelete = ov[ov.length - 1]
+            batter = matchData.left.team1[toDelete.batter]
+            console.log(batter)
             if (ov[ov.length - 1].counted == true) {
                 ov.splice(ov.length - 1, 1)
                 firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
                 firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls - 1)
-
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/'+toDelete.batter+'/balls').set(matchData.left.team1[toDelete.batter].balls - 1)
+                // firebase.database().ref('sports/cricket/liveMatch/left/team2/bowler/balls').set(Number(matchData.left.team2.bowler.balls) - 1)
             } else {
                 ov.splice(ov.length - 1, 1)
                 firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
             }
-            if (toDelete == "W") {
-            } else if (toDelete == 'NB') {
-            } else if (toDelete == 'Wd') {
-            } else if (toDelete == 'Dead ball') {
-            } else if (toDelete == 'LB') {
+
+            if (toDelete.score == "W") {
+                alert('Can not Undo Wicket!')
+            } else if (toDelete.score == 'NB') {
+                firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - 1)
+            } else if (toDelete.score == 'Wd') {
+                firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - 1)
+            } else if (toDelete.score == 'Dead ball') {
+                firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls - 1)
+            } else if (toDelete.score == 'LB') {
             } else {
                 firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - Number(toDelete.score))
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/'+toDelete.batter+'/score').set(Number(batter.score) - Number(toDelete.score))
+                // firebase.database().ref('sports/cricket/liveMatch/left/team2/bowler/score').set(Number(matchData.left.team2.bowler.score) - Number(toDelete.score))
             }
         }
     }
@@ -211,25 +243,44 @@
             console.log('Out')
             document.getElementById('wicket-modal').style.display = 'flex';
         } else if (txt == 'NB') {
+            addRuns('NB', 1, 'Bowler', 'Batter', false)
             console.log('');
         } else if (txt == 'Wd') {
-
+            addRuns('Wd', 1, 'Bowler', 'Batter', false)
         } else if (txt == 'Dead ball') {
-
+            addRuns('Dd', 0, 'Bowler', 'Batter', false)
         } else if (txt == 'LB') {
-
+            addRuns('LB', 0, 'Bowler', 'Batter', true)
         } else {
             addRuns(txt, Number(txt), 'Bowler', 'Batter', true)
         }
     }
     function addRuns(title, runs, baller, batter, ballCounted) {
-        overs_arr[overs_arr.length - 1].push({ batter: batter, bowler: baller, score: title, counted: ballCounted })
-        firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
         if (ballCounted == true) {
             balls += 1
             firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls)
+            ballerBalls = matchData.right.team2.bowler.balls + 1
+            firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/balls').set(ballerBalls)
+            if (matchData.left.team1.batter1.onStrike == true) {
+                batter1.balls += 1
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/balls').set(batter1.balls)
+                batter1.score += runs
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/score').set(batter1.score)
+            } else if (matchData.left.team1.batter2.onStrike == true) {
+                batter2.balls += 1
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/batter2/balls').set(batter2.balls)
+                batter2.score += runs
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/batter2/score').set(batter2.score)
+            }
+        }
+        if (matchData.left.team1.batter1.onStrike == true) {
+            batter = 'batter1'
+        } else if (matchData.left.team1.batter2.onStrike == true) {
+            batter = 'batter2'
         }
         firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) + Number(runs))
+        overs_arr[overs_arr.length - 1].push({ batter: batter, bowler: matchData.right.team2.bowler.name, score: title, counted: ballCounted })
+        firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
     }
     function reviewSwitchToggle() {
         switchState = document.getElementById('review-switch').checked
@@ -269,10 +320,17 @@
             overs_arr = [];
             overs_arr = matchData.overs;
             mainData = matchData.center;
+            batter1 = matchData.left.team1.batter1;
+            batter2 = matchData.left.team1.batter2;
             document.getElementById('team-names').innerHTML = matchData.left.team1.name + ' v/s ' + matchData.right.team2.name
             overs = Math.floor(Number(balls) / 6) + '.' + (Number(balls % 6))
             document.getElementById('scorecard').innerHTML = `${matchData.center.runs}-${matchData.center.wickets} (${overs})`
             loadDropdowns()
+            if (matchData.left.team1.batter1.onStrike == true) {
+                batterOnStrike('batter1')
+            } else if (matchData.left.team1.batter2.onStrike == true) {
+                batterOnStrike('batter2')
+            }
         }, function () { })
     }
     function loadDropdowns() {
@@ -367,6 +425,11 @@
     }
 </style>
 <style>
+    .strike-active {
+        background-color: white !important;
+        color: black !important;
+    }
+
     .plain-button {
         background-color: transparent;
         border: none;
