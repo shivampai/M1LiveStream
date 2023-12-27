@@ -54,8 +54,8 @@
                         <!-- <span class="right-over-ball"></span> -->
                     </span>
                     &nbsp;&nbsp;
-                    <span style="display: flex;justify-content: space-between;align-items: center;width: 175px;">
-                        <span id="right-bowler-name"></span>
+                    <span style="display: flex;justify-content: space-between;align-items: center;">
+                        <span id="right-bowler-name"></span>&nbsp;
                         <span id="right-bowler-info"></span>
                     </span>
                     &nbsp;&nbsp;
@@ -181,12 +181,12 @@
                 document.getElementById('team1-name').innerHTML = matchData.left.team1.name;
 
                 document.getElementById('team1-batter1-name').innerHTML = matchData.left.team1.batter1.name;
-                document.getElementById('team1-batter1-score').innerHTML = matchData.left.team1.batter1.score;
+                document.getElementById('team1-batter1-score').innerHTML = matchData.left.team1.batter1.score + ` (${matchData.left.team1.batter1.balls})`;
 
                 document.getElementById('team1-batter2-name').innerHTML = matchData.left.team1.batter2.name;
-                document.getElementById('team1-batter2-score').innerHTML = matchData.left.team1.batter2.score;
+                document.getElementById('team1-batter2-score').innerHTML = matchData.left.team1.batter2.score + ` (${matchData.left.team1.batter2.balls})`;
                 if (matchData.left.team1.batter1.onStrike == true) {
-                    document.getElementById('team1-batter1-name').innerHTML = '$#10148;&nbsp;' + matchData.left.team1.batter1.name;
+                    document.getElementById('team1-batter1-name').innerHTML = '&#10148;&nbsp;' + matchData.left.team1.batter1.name;
                     document.getElementById('team1-batter2-name').innerHTML = matchData.left.team1.batter2.name;
                 } else if (matchData.left.team1.batter2.onStrike == true) {
                     document.getElementById('team1-batter2-name').innerHTML = '&#10148&nbsp;' + matchData.left.team1.batter2.name;
@@ -199,7 +199,7 @@
                 document.getElementById('right-bowler-name').innerHTML = matchData.right.team2.bowler.name;
                 bowlerData = matchData.right.team2.bowler
                 bowler_overs = `${Math.floor(bowlerData.balls / 6)}.${Math.floor(bowlerData.balls % 6)}`
-                document.getElementById('right-bowler-info').innerHTML = `${bowlerData.wickets}/${bowlerData.score}&nbsp;${bowler_overs}`
+                document.getElementById('right-bowler-info').innerHTML = `${bowlerData.wickets}/${bowlerData.score}&nbsp;(${bowler_overs})`
             }
             //Load Over
             {
@@ -209,7 +209,19 @@
                     over_elem = document.getElementById('over-balls')
                     over_elem.innerHTML = ''
                     for (b = 1; b < over.length; b++) {
-                        over_elem.innerHTML += `<span class="right-over-ball">${over[b].score}</span>`
+                        if (over[b].score == 'Wd') {
+                            over_elem.innerHTML += `<span class="right-over-ball contrast-color-ball">${over[b].score}</span>`
+                         } else if (over[b].score == 'NB') {
+                            over_elem.innerHTML += `<span class="right-over-ball contrast-color-ball">${over[b].score}</span>`
+                         } else if (over[b].score == '6') {
+                            over_elem.innerHTML += `<span class="right-over-ball contrast-color-ball">${over[b].score}</span>`
+                         } else if (over[b].score == '4') {
+                            over_elem.innerHTML += `<span class="right-over-ball contrast-color-ball">${over[b].score}</span>`
+                         } else if (over[b].score == 'W') {
+                            over_elem.innerHTML += `<span class="right-over-ball contrast-color-ball">${over[b].score}</span>`
+                         } else{
+                            over_elem.innerHTML += `<span class="right-over-ball">${over[b].score}</span>`
+                        }
                     }
                 }
             }
@@ -217,6 +229,10 @@
     }
 </script>
 <style>
+    .contrast-color-ball{
+        background-color: white;
+        color: black;
+    }
     .right-over-ball {
         height: 25px;
         border-radius: 200px;
