@@ -48,9 +48,9 @@
     <b>Batter On Strike : </b>
     <div style="display: flex;width: 100vw;">
         <button class="button" onclick="batterOnStrike('batter1')" style="width: 50vw;"
-            id="strike-btn-batter1">Batter1</button>
+            id="strike-btn-batter1"></button>
         <button class="button" onclick="batterOnStrike('batter2')" style="width: 50vw;"
-            id="strike-btn-batter2">Batter2</button>
+            id="strike-btn-batter2"></button>
     </div>
     <hr>
     <button class="button w-100" onclick="document.getElementById('new-over-modal').style.display = 'flex'">New
@@ -216,7 +216,7 @@
                 firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
                 firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls - 1)
                 firebase.database().ref('sports/cricket/liveMatch/left/team1/'+toDelete.batter+'/balls').set(matchData.left.team1[toDelete.batter].balls - 1)
-                // firebase.database().ref('sports/cricket/liveMatch/left/team2/bowler/balls').set(Number(matchData.left.team2.bowler.balls) - 1)
+                firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/balls').set(Number(matchData.right.team2.bowler.balls) - 1)
             } else {
                 ov.splice(ov.length - 1, 1)
                 firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
@@ -234,7 +234,7 @@
             } else {
                 firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - Number(toDelete.score))
                 firebase.database().ref('sports/cricket/liveMatch/left/team1/'+toDelete.batter+'/score').set(Number(batter.score) - Number(toDelete.score))
-                // firebase.database().ref('sports/cricket/liveMatch/left/team2/bowler/score').set(Number(matchData.left.team2.bowler.score) - Number(toDelete.score))
+                firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/score').set(Number(matchData.right.team2.bowler.score) - Number(toDelete.score))
             }
         }
     }
@@ -257,10 +257,19 @@
     }
     function addRuns(title, runs, baller, batter, ballCounted) {
         if (ballCounted == true) {
+            if(title == 'W'){
+                bowlerWickets = Number(matchData.right.team2.bowler.wickets)
+                bowlerWickets++
+                firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/wickets').set(bowlerWickets)
+                firebase.database().ref('sports/cricket/liveMatch/center/wickets').set(Number(matchData.center.wickets)+1)
+            }
             balls += 1
             firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls)
             ballerBalls = matchData.right.team2.bowler.balls + 1
             firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/balls').set(ballerBalls)
+            bowlerScore = Number(matchData.right.team2.bowler.score)
+            bowlerScore += runs
+            firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/score').set(bowlerScore)
             if (matchData.left.team1.batter1.onStrike == true) {
                 batter1.balls += 1
                 firebase.database().ref('sports/cricket/liveMatch/left/team1/batter1/balls').set(batter1.balls)
@@ -331,6 +340,8 @@
             } else if (matchData.left.team1.batter2.onStrike == true) {
                 batterOnStrike('batter2')
             }
+            document.getElementById('strike-btn-batter1').innerHTML = matchData.left.team1.batter1.name;
+            document.getElementById('strike-btn-batter2').innerHTML = matchData.left.team1.batter2.name;
         }, function () { })
     }
     function loadDropdowns() {
