@@ -32,6 +32,7 @@
     <!-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa&family=Lato&family=Orbitron&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 </head>
 
@@ -101,8 +102,15 @@
                     <optgroup class="fielders-dropdown" label="Players"></optgroup>
                 </select>
             -->
+
                 <hr>
-                <input type="text" placeholder="New Batter">
+                <input type="text" id="wicket-new-player" placeholder="New Batter">
+                <label for="">New Batter On Strike?</label>
+                <label class="switch">
+                    <input type="checkbox" id="wicket-onStrike">
+                    <span class="slider round"></span>
+                </label>
+
                 <hr>
                 <button class="button w-100" onclick="regWicket()">Done</button>
             </div>
@@ -184,11 +192,100 @@
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Dead ball</button>
         </div>
     </div>
+    <hr>
+    <button class="button w-100" onclick="document.getElementById('other-options-modal').style.display = 'flex'">Other
+        Options</button>
+    <div class="modal" id="other-options-modal">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Other Options</h2>
+                    <button class="close-btn"
+                        onclick="document.getElementById('other-options-modal').style.display = 'none'">Close</button>
+                </div>
+                <div>
+                    <button class="button w-100" onclick="editTopBarText()">Edit Top Bar Text</button>
+                    <button class="button w-100" onclick="restartMatch()">New Match</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script>
+    function editTopBarText() {
+        swal({
+            title: 'Enter Text to be displayed',
+            text: 'Current Text Displayed : ' + matchData.top.lbl,
+            content: "input",
+            button: {
+                text: "Set",
+                closeModal: true,
+            },
+        })
+            .then(toBeDisplayed => {
+                if (toBeDisplayed != null || toBeDisplayed != '') {
+                    firebase.database().ref('sports/cricket/liveMatch/top/lbl').set(toBeDisplayed)
+                }
+            })
+    }
     function regWicket() {
         bowler = document.getElementById('new-over-bowler').value;
+        firebase.database().ref(`sports/cricket/liveMatch/left/team1/${document.getElementById('wicket-who-got-out').value}/`).set({ balls: 0, name: document.getElementById('wicket-new-player').value, onStrike: document.getElementById('wicket-onStrike').checked, score: 0 })
         addRuns('W', 0, bowler, document.getElementById('wicket-who-got-out').value, true)
+        // wicket-new-player
+    }
+    function restartMatch() {
+        team2name = 'T2'
+        team1name = 'T1'
+        team2players = [{ name: 'Player Name' }]
+        bowlerName = ''
+        raw_data = {
+            left: {
+                team1: {
+                    batter1: {
+                        name: 'P1',
+                        onStrike: true,
+                        score: 0,
+                        balls: 0
+                    },
+                    batter2: {
+                        name: 'P2',
+                        onStrike: false,
+                        score: 0,
+                        balls: 0
+                    },
+                    name: team1name
+                }
+            },
+            top: {
+                estd: 0,
+                lbl: '',
+                rr: 0
+            },
+            right: {
+                team2: {
+                    name: team2name,
+                    players: team2players,
+                    bowler: {
+                        name: bowlerName,
+                        score: 0,
+                        wickets: 0,
+                        balls: 0
+                    }
+                }
+            },
+            center: {
+                balls: 0,
+                matchLength: 24,
+                runs: 0,
+                wickets: 0
+            },
+            overs: [[{ null: true }]],
+            review: { open: false, impact: '', original: '', pitching: '', reviewBy: '', wicket: '' },
+            backend: { currentBall: 0, footages: { startRecord: false } }
+        }
+        firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
     }
     function batterOnStrike(batter) {
         if (batter == 'batter1') {
@@ -215,7 +312,7 @@
                 ov.splice(ov.length - 1, 1)
                 firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
                 firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls - 1)
-                firebase.database().ref('sports/cricket/liveMatch/left/team1/'+toDelete.batter+'/balls').set(matchData.left.team1[toDelete.batter].balls - 1)
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/' + toDelete.batter + '/balls').set(matchData.left.team1[toDelete.batter].balls - 1)
                 firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/balls').set(Number(matchData.right.team2.bowler.balls) - 1)
             } else {
                 ov.splice(ov.length - 1, 1)
@@ -223,9 +320,13 @@
             }
 
             if (toDelete.score == "W") {
-                alert('Can not Undo Wicket!')
+                // alert('Can not Undo Wicket!')
+                bowlerWickets = Number(matchData.right.team2.bowler.wickets)
+                bowlerWickets--
+                firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/wickets').set(bowlerWickets)
+                firebase.database().ref('sports/cricket/liveMatch/center/wickets').set(Number(matchData.center.wickets) - 1)
             } else if (toDelete.score == 'NB') {
-                firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - 1)
+                firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - Number(toDelete.runs))
             } else if (toDelete.score == 'Wd') {
                 firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - 1)
             } else if (toDelete.score == 'Dead ball') {
@@ -233,7 +334,7 @@
             } else if (toDelete.score == 'LB') {
             } else {
                 firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) - Number(toDelete.score))
-                firebase.database().ref('sports/cricket/liveMatch/left/team1/'+toDelete.batter+'/score').set(Number(batter.score) - Number(toDelete.score))
+                firebase.database().ref('sports/cricket/liveMatch/left/team1/' + toDelete.batter + '/score').set(Number(batter.score) - Number(toDelete.score))
                 firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/score').set(Number(matchData.right.team2.bowler.score) - Number(toDelete.score))
             }
         }
@@ -243,7 +344,23 @@
             console.log('Out')
             document.getElementById('wicket-modal').style.display = 'flex';
         } else if (txt == 'NB') {
-            addRuns('NB', 1, 'Bowler', 'Batter', false)
+            swal({
+                title: 'No Ball + _____ Runs',
+                content: "input",
+                button: {
+                    text: "Set",
+                    closeModal: true,
+                },
+            })
+                .then(nbRuns => {
+                    if (nbRuns != null || nbRuns != 0) {
+                        addRuns('NB', 1 + Number(nbRuns), 'Bowler', 'Batter', false)
+                    }
+                    else {
+                        addRuns('NB', 1, 'Bowler', 'Batter', false)
+                    }
+                })
+
             console.log('');
         } else if (txt == 'Wd') {
             addRuns('Wd', 1, 'Bowler', 'Batter', false)
@@ -255,13 +372,13 @@
             addRuns(txt, Number(txt), 'Bowler', 'Batter', true)
         }
     }
-    function addRuns(title, runs, baller, batter, ballCounted) {
+    function addRuns(title, runs, baller, bater, ballCounted) {
         if (ballCounted == true) {
-            if(title == 'W'){
+            if (title == 'W') {
                 bowlerWickets = Number(matchData.right.team2.bowler.wickets)
                 bowlerWickets++
                 firebase.database().ref('sports/cricket/liveMatch/right/team2/bowler/wickets').set(bowlerWickets)
-                firebase.database().ref('sports/cricket/liveMatch/center/wickets').set(Number(matchData.center.wickets)+1)
+                firebase.database().ref('sports/cricket/liveMatch/center/wickets').set(Number(matchData.center.wickets) + 1)
             }
             balls += 1
             firebase.database().ref('sports/cricket/liveMatch/center/balls').set(balls)
@@ -288,7 +405,7 @@
             batter = 'batter2'
         }
         firebase.database().ref('sports/cricket/liveMatch/center/runs').set(Number(mainData.runs) + Number(runs))
-        overs_arr[overs_arr.length - 1].push({ batter: batter, bowler: matchData.right.team2.bowler.name, score: title, counted: ballCounted })
+        overs_arr[overs_arr.length - 1].push({ batter: batter, bowler: matchData.right.team2.bowler.name, score: title, counted: ballCounted, runs: Number(runs) })
         firebase.database().ref('sports/cricket/liveMatch/overs/').set(overs_arr)
     }
     function reviewSwitchToggle() {
