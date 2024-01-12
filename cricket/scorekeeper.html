@@ -205,14 +205,41 @@
                 </div>
                 <div>
                     <button class="button w-100" onclick="editTopBarText()">Edit Top Bar Text</button>
-                    <button class="button w-100" onclick="restartMatch()">New Match</button>
-
+                    <button class="button w-100"
+                        onclick="document.getElementById('new-match-options-modal').style.display = 'flex'">New
+                        Match</button>
                 </div>
             </div>
         </div>
     </div>
+    <div class="modal" id="new-match-options-modal">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Other Options</h2>
+                    <button class="close-btn"
+                        onclick="document.getElementById('new-match-options-modal').style.display = 'none'">Close</button>
+                </div>
+                <div>
+                    <input type="text" placeholder="Team 1 Name" id="new-match-t1-name">
+                    <input type="text" placeholder="Team 2 ID" id="new-match-t2-id">
+                    <hr>
+                    <input type="text" placeholder="Batter 1 Name" id="new-match-b1-name">
+                    <input type="text" placeholder="Batter 2 Name" id="new-match-b2-name">
+                    <hr>
+                    <input type="text" placeholder="Bowler Name" id="new-match-bowler-name">
+                    <hr>
+                    <button class="button w-100" onclick="restartMatch()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 <script>
+    function newMatch() {
+
+    }
     function editTopBarText() {
         swal({
             title: 'Enter Text to be displayed',
@@ -236,56 +263,64 @@
         // wicket-new-player
     }
     function restartMatch() {
-        team2name = 'T2'
-        team1name = 'T1'
-        team2players = [{ name: 'Player Name' }]
-        bowlerName = ''
-        raw_data = {
-            left: {
-                team1: {
-                    batter1: {
-                        name: 'P1',
-                        onStrike: true,
-                        score: 0,
-                        balls: 0
-                    },
-                    batter2: {
-                        name: 'P2',
-                        onStrike: false,
-                        score: 0,
-                        balls: 0
-                    },
-                    name: team1name
-                }
-            },
-            top: {
-                estd: 0,
-                lbl: '',
-                rr: 0
-            },
-            right: {
-                team2: {
-                    name: team2name,
-                    players: team2players,
-                    bowler: {
-                        name: bowlerName,
-                        score: 0,
-                        wickets: 0,
-                        balls: 0
+        team1name = document.getElementById('new-match-t1-name').value
+        firebase.database().ref('sports/cricket/teams/' + document.getElementById('new-match-t2-id').value + '/').once('value', (snapshot) => {
+            data = snapshot.val()
+            tm2players = data.players
+            team2name = data.name
+            team2players = []
+            for (i = 0; i < tm2players.length; i++) {
+                team2players.push({ name: tm2players[i] })
+            }
+            bowlerName = document.getElementById('new-match-bowler-name').value
+            raw_data = {
+                left: {
+                    team1: {
+                        batter1: {
+                            name: document.getElementById('new-match-b1-name').value,
+                            onStrike: true,
+                            score: 0,
+                            balls: 0
+                        },
+                        batter2: {
+                            name: document.getElementById('new-match-b2-name').value,
+                            onStrike: false,
+                            score: 0,
+                            balls: 0
+                        },
+                        name: team1name
                     }
-                }
-            },
-            center: {
-                balls: 0,
-                matchLength: 24,
-                runs: 0,
-                wickets: 0
-            },
-            overs: [[{ null: true }]],
-            review: { open: false, impact: '', original: '', pitching: '', reviewBy: '', wicket: '' },
-            backend: { currentBall: 0, footages: { startRecord: false } }
-        }
-        firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
+                },
+                top: {
+                    estd: 0,
+                    lbl: '',
+                    rr: 0
+                },
+                right: {
+                    team2: {
+                        name: team2name,
+                        players: team2players,
+                        bowler: {
+                            name: bowlerName,
+                            score: 0,
+                            wickets: 0,
+                            balls: 0
+                        }
+                    }
+                },
+                center: {
+                    balls: 0,
+                    matchLength: 30,
+                    runs: 0,
+                    wickets: 0
+                },
+                overs: [[{ null: true }]],
+                review: { open: false, impact: '', original: '', pitching: '', reviewBy: '', wicket: '' },
+                backend: { currentBall: 0, footages: { startRecord: false } }
+            }
+            firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
+            location.reload()
+        })
     }
     function batterOnStrike(batter) {
         if (batter == 'batter1') {
@@ -494,6 +529,8 @@
         // overs_arr = [[{ null: true }, { batter: 'SP1', bowler: 'SP2', score: 'NB' }, { batter: 'SP1', bowler: 'SP2', score: 'W' }, { batter: 'SP3', bowler: 'SP2', score: '2' }, { batter: 'SP3', bowler: 'SP2', score: '1' }]]
         ref = firebase.database().ref('/sports/cricket/liveMatch/overs');
         // .set(overs_arr)
+        firebase.database().ref('/sports/cricket/liveMatch/right/team2/bowler').set({name:document.getElementById('new-over-bowler').value,balls:0,score:0,wickets:0})
+
         overs_arr.push([{ null: true }])
         ref.set(overs_arr)
     }
