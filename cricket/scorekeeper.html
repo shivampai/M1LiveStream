@@ -208,6 +208,14 @@
                     <button class="button w-100"
                         onclick="document.getElementById('new-match-options-modal').style.display = 'flex'">New
                         Match</button>
+                    <div style="display: flex;justify-content: space-between;width: 100%;margin-top: 5px;">
+                        <label for="show-scorebar-switch" style="font-size: 18px;">Show Scorebar in live feed</label>
+                        <label class="switch">
+                            <input type="checkbox" id="show-scorebar-switch" onchange="showScorebarSwitch(this.checked)">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -221,7 +229,7 @@
                         onclick="document.getElementById('new-match-options-modal').style.display = 'none'">Close</button>
                 </div>
                 <div>
-                    <input type="text" placeholder="Team 1 Name" id="new-match-t1-name">
+                    <input type="text" placeholder="Team 1 ID" id="new-match-t1-id">
                     <input type="text" placeholder="Team 2 ID" id="new-match-t2-id">
                     <hr>
                     <input type="text" placeholder="Batter 1 Name" id="new-match-b1-name">
@@ -237,8 +245,8 @@
 
 </body>
 <script>
-    function newMatch() {
-
+    function showScorebarSwitch(value) {
+            firebase.database().ref('sports/cricket/liveMatch/backend/matchStart').set(value)
     }
     function editTopBarText() {
         swal({
@@ -263,7 +271,7 @@
         // wicket-new-player
     }
     function restartMatch() {
-        team1name = document.getElementById('new-match-t1-name').value
+        // team1name = document.getElementById('new-match-t1-name').value
         firebase.database().ref('sports/cricket/teams/' + document.getElementById('new-match-t2-id').value + '/').once('value', (snapshot) => {
             data = snapshot.val()
             tm2players = data.players
@@ -272,54 +280,58 @@
             for (i = 0; i < tm2players.length; i++) {
                 team2players.push({ name: tm2players[i] })
             }
-            bowlerName = document.getElementById('new-match-bowler-name').value
-            raw_data = {
-                left: {
-                    team1: {
-                        batter1: {
-                            name: document.getElementById('new-match-b1-name').value,
-                            onStrike: true,
-                            score: 0,
-                            balls: 0
-                        },
-                        batter2: {
-                            name: document.getElementById('new-match-b2-name').value,
-                            onStrike: false,
-                            score: 0,
-                            balls: 0
-                        },
-                        name: team1name
-                    }
-                },
-                top: {
-                    estd: 0,
-                    lbl: '',
-                    rr: 0
-                },
-                right: {
-                    team2: {
-                        name: team2name,
-                        players: team2players,
-                        bowler: {
-                            name: bowlerName,
-                            score: 0,
-                            wickets: 0,
-                            balls: 0
+            firebase.database().ref('sports/cricket/teams/' + document.getElementById('new-match-t1-id').value + '/').once('value', (snapshot) => {
+                t2data = snapshot.val()
+                team1name = t2data.name
+                bowlerName = document.getElementById('new-match-bowler-name').value
+                raw_data = {
+                    left: {
+                        team1: {
+                            batter1: {
+                                name: document.getElementById('new-match-b1-name').value,
+                                onStrike: true,
+                                score: 0,
+                                balls: 0
+                            },
+                            batter2: {
+                                name: document.getElementById('new-match-b2-name').value,
+                                onStrike: false,
+                                score: 0,
+                                balls: 0
+                            },
+                            name: team1name
                         }
-                    }
-                },
-                center: {
-                    balls: 0,
-                    matchLength: 30,
-                    runs: 0,
-                    wickets: 0
-                },
-                overs: [[{ null: true }]],
-                review: { open: false, impact: '', original: '', pitching: '', reviewBy: '', wicket: '' },
-                backend: { currentBall: 0, footages: { startRecord: false } }
-            }
-            firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
-            location.reload()
+                    },
+                    top: {
+                        estd: 0,
+                        lbl: '',
+                        rr: 0
+                    },
+                    right: {
+                        team2: {
+                            name: team2name,
+                            players: team2players,
+                            bowler: {
+                                name: bowlerName,
+                                score: 0,
+                                wickets: 0,
+                                balls: 0
+                            }
+                        }
+                    },
+                    center: {
+                        balls: 0,
+                        matchLength: 30,
+                        runs: 0,
+                        wickets: 0
+                    },
+                    overs: [[{ null: true }]],
+                    review: { open: false, impact: '', original: '', pitching: '', reviewBy: '', wicket: '' },
+                    backend: { matchStart: false, currentBall: 0, footages: { startRecord: false } }
+                }
+                firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
+                location.reload()
+            });
         })
     }
     function batterOnStrike(batter) {
@@ -529,7 +541,7 @@
         // overs_arr = [[{ null: true }, { batter: 'SP1', bowler: 'SP2', score: 'NB' }, { batter: 'SP1', bowler: 'SP2', score: 'W' }, { batter: 'SP3', bowler: 'SP2', score: '2' }, { batter: 'SP3', bowler: 'SP2', score: '1' }]]
         ref = firebase.database().ref('/sports/cricket/liveMatch/overs');
         // .set(overs_arr)
-        firebase.database().ref('/sports/cricket/liveMatch/right/team2/bowler').set({name:document.getElementById('new-over-bowler').value,balls:0,score:0,wickets:0})
+        firebase.database().ref('/sports/cricket/liveMatch/right/team2/bowler').set({ name: document.getElementById('new-over-bowler').value, balls: 0, score: 0, wickets: 0 })
 
         overs_arr.push([{ null: true }])
         ref.set(overs_arr)
