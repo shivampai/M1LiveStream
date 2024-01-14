@@ -189,7 +189,7 @@
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Wd</button>
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">NB</button>
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">LB</button>
-            <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Dead ball</button>
+            <button class="ball-assign bg-red" onclick="">CSTM</button>
         </div>
     </div>
     <hr>
@@ -211,7 +211,8 @@
                     <div style="display: flex;justify-content: space-between;width: 100%;margin-top: 5px;">
                         <label for="show-scorebar-switch" style="font-size: 18px;">Show Scorebar in live feed</label>
                         <label class="switch">
-                            <input type="checkbox" id="show-scorebar-switch" onchange="showScorebarSwitch(this.checked)">
+                            <input type="checkbox" id="show-scorebar-switch"
+                                onchange="showScorebarSwitch(this.checked)">
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -229,15 +230,38 @@
                         onclick="document.getElementById('new-match-options-modal').style.display = 'none'">Close</button>
                 </div>
                 <div>
-                    <input type="text" placeholder="Team 1 ID" id="new-match-t1-id">
-                    <input type="text" placeholder="Team 2 ID" id="new-match-t2-id">
+                    <select class="all-teams-select" id="new-match-t1-id" onchange="loadNewMatchDropdowns()"></select>
+                    <select id="new-match-t2-id" class="all-teams-select" onchange="loadNewMatchDropdowns()"></select>
                     <hr>
-                    <input type="text" placeholder="Batter 1 Name" id="new-match-b1-name">
-                    <input type="text" placeholder="Batter 2 Name" id="new-match-b2-name">
+                    <select id="new-match-b1-name" class="team1-select"></select>
+                    <select id="new-match-b2-name" class="team1-select"></select>
+                    <hr>
+                    <select class="team2-select" id="new-match-bowler-name"></select>
+                    <hr>
+                    <button class="button w-100" onclick="restartMatch()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal">
+        <div class="modal-box">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Other Options</h2>
+                    <button class="close-btn"
+                        onclick="document.getElementById('new-match-options-modal').style.display = 'none'">Close</button>
+                </div>
+                <div>
+                    <select type="text" placeholder="Team 1 ID" class="all-team-select" id="new-match-t1-id"
+                        onkeyup=""></select>
+                    <select type="text" placeholder="Team 2 ID" class="all-team-select" id="new-match-t2-id"></select>
+                    <hr>
+                    <select type="text" placeholder="Batter 1 Name" id="new-match-b1-name"></select>
+                    <select type="text" placeholder="Batter 2 Name" id="new-match-b2-name"></select>
                     <hr>
                     <input type="text" placeholder="Bowler Name" id="new-match-bowler-name">
                     <hr>
-                    <button class="button w-100" onclick="restartMatch()">Create</button>
+                    <button class="button w-100" onclick="setBatterBowler()">Create</button>
                 </div>
             </div>
         </div>
@@ -245,8 +269,40 @@
 
 </body>
 <script>
+    function loadNewMatchDropdowns() {
+        t1 = document.getElementById('new-match-t1-id').value
+        t2 = document.getElementById('new-match-t2-id').value
+        if (t1 != '') {
+            firebase.database().ref(`sports/cricket/teams/${t1}`).once('value', (snapshot) => {
+                t1Players = snapshot.val()
+                t1Players = t1Players.players
+                elem_iH = ''
+                for (p = 0; p < t1Players.length; p++) {
+                    elem_iH += `<option>${t1Players[p]}</option>`
+                }
+                elems = document.getElementsByClassName('team1-select')
+                for (e = 0; e < elems.length; e++) {
+                    elems[e].innerHTML = elem_iH
+                }
+                if (t2 != '') {
+                    firebase.database().ref(`sports/cricket/teams/${t2}`).once('value', (snapshot) => {
+                        t2Players = snapshot.val()
+                        t2Players = t2Players.players
+                        elem_iH = ''
+                        for (p = 0; p < t2Players.length; p++) {
+                            elem_iH += `<option>${t2Players[p]}</option>`
+                        }
+                        elems = document.getElementsByClassName('team2-select')
+                        for (e = 0; e < elems.length; e++) {
+                            elems[e].innerHTML = elem_iH
+                        }
+                    })
+                }
+            })
+        }
+    }
     function showScorebarSwitch(value) {
-            firebase.database().ref('sports/cricket/liveMatch/backend/matchStart').set(value)
+        firebase.database().ref('sports/cricket/liveMatch/backend/matchStart').set(value)
     }
     function editTopBarText() {
         swal({
@@ -281,8 +337,8 @@
                 team2players.push({ name: tm2players[i] })
             }
             firebase.database().ref('sports/cricket/teams/' + document.getElementById('new-match-t1-id').value + '/').once('value', (snapshot) => {
-                t2data = snapshot.val()
-                team1name = t2data.name
+                t1data = snapshot.val()
+                team1name = t1data.name
                 bowlerName = document.getElementById('new-match-bowler-name').value
                 raw_data = {
                     left: {
@@ -299,12 +355,13 @@
                                 score: 0,
                                 balls: 0
                             },
+                            players: t1data.players,
                             name: team1name
                         }
                     },
                     top: {
                         estd: 0,
-                        lbl: '',
+                        lbl: 'Run Rate : {{rr}} | Estimated Score : {{estd}}',
                         rr: 0
                     },
                     right: {
@@ -330,7 +387,7 @@
                     backend: { matchStart: false, currentBall: 0, footages: { startRecord: false } }
                 }
                 firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
-                location.reload()
+                // location.reload()
             });
         })
     }
@@ -536,6 +593,22 @@
                 elems[i].innerHTML += `<option value="batter2">${t1batter2.name}</option>`
             }
         });
+        firebase.database().ref('/sports/cricket/teams').once('value', (snapshot) => {
+            all_groups = snapshot.val()
+            elem_innerHTML = '<option disabled selected value="">--Select Team--</option>'
+            for (i = 0; i < all_groups.length; i++) {
+                elem_innerHTML += '<optgroup label="Group ' + (i + 1) + '">'
+                all_teams = all_groups[i];
+                for (k = 0; k < all_teams.length; k++) {
+                    elem_innerHTML += `<option value="${i}/${k}">${all_teams[k].name}</option>`
+                }
+                elem_innerHTML += '</optgroup>'
+            }
+            elems = document.getElementsByClassName('all-teams-select')
+            for (e = 0; e < elems.length; e++) {
+                elems[e].innerHTML = elem_innerHTML
+            }
+        });
     }
     function createNewOver() {
         // overs_arr = [[{ null: true }, { batter: 'SP1', bowler: 'SP2', score: 'NB' }, { batter: 'SP1', bowler: 'SP2', score: 'W' }, { batter: 'SP3', bowler: 'SP2', score: '2' }, { batter: 'SP3', bowler: 'SP2', score: '1' }]]
@@ -625,7 +698,8 @@
         width: 100%;
     }
 
-    input {
+    input,
+    select {
         background-color: white;
         outline: none;
         border: 1px solid black;
