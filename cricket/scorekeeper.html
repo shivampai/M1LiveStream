@@ -189,7 +189,8 @@
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">Wd</button>
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">NB</button>
             <button class="ball-assign bg-red" onclick="assignBall(this.innerHTML)">LB</button>
-            <button class="ball-assign bg-red" onclick="">CSTM</button>
+            <button class="ball-assign bg-red"
+                onclick="document.getElementById('custom-ball-modal').style.display = 'flex'">CSTM</button>
         </div>
     </div>
     <hr>
@@ -243,25 +244,27 @@
             </div>
         </div>
     </div>
-    <div class="modal">
+    <!-- Custom  -->
+    <div class="modal" id="custom-ball-modal">
         <div class="modal-box">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Other Options</h2>
+                    <h2>Custom Ball</h2>
                     <button class="close-btn"
-                        onclick="document.getElementById('new-match-options-modal').style.display = 'none'">Close</button>
+                        onclick="document.getElementById('custom-ball-modal').style.display = 'none'">Close</button>
                 </div>
                 <div>
-                    <select type="text" placeholder="Team 1 ID" class="all-team-select" id="new-match-t1-id"
-                        onkeyup=""></select>
-                    <select type="text" placeholder="Team 2 ID" class="all-team-select" id="new-match-t2-id"></select>
-                    <hr>
-                    <select type="text" placeholder="Batter 1 Name" id="new-match-b1-name"></select>
-                    <select type="text" placeholder="Batter 2 Name" id="new-match-b2-name"></select>
-                    <hr>
-                    <input type="text" placeholder="Bowler Name" id="new-match-bowler-name">
-                    <hr>
-                    <button class="button w-100" onclick="setBatterBowler()">Create</button>
+                    <input type="text" placeholder="Title" id="custom-ball-title">
+                    <input type="number" placeholder="Runs" id="custom-ball-runs">
+                    <div style="display: flex;justify-content: space-between;width: 100%;margin-top: 5px;">
+                        <label for="custom-ball-counted" style="font-size: 18px;">Ball Counted?</label>
+                        <label class="switch">
+                            <input type="checkbox" id="custom-ball-counted">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                        <button class="button w-100"
+                            onclick="addRuns(document.getElementById('custom-ball-title').value,document.getElementById('custom-ball-runs').value,'','',document.getElementById('custom-ball-counted').checked);document.getElementById('custom-ball-modal').style.display = 'none'">Done</button>
                 </div>
             </div>
         </div>
@@ -361,7 +364,7 @@
                     },
                     top: {
                         estd: 0,
-                        lbl: 'Run Rate : {{rr}} | Estimated Score : {{estd}}',
+                        lbl: 'Run Rate : {{rr}} | Projected Score : {{estd}}',
                         rr: 0
                     },
                     right: {
@@ -387,7 +390,7 @@
                     backend: { matchStart: false, currentBall: 0, footages: { startRecord: false } }
                 }
                 firebase.database().ref('sports/cricket/liveMatch/').set(raw_data)
-                // location.reload()
+                location.reload()
             });
         })
     }
